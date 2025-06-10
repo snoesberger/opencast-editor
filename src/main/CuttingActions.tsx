@@ -1,6 +1,6 @@
 import React from "react";
 
-import { BREAKPOINTS, basicButtonStyle, customIconStyle, undisplay } from "../cssStyles";
+import { BREAKPOINTS, basicButtonStyle, customIconStyle, selectFieldStyle, undisplay } from "../cssStyles";
 
 import { IconType } from "react-icons";
 import { LuScissors, LuChevronLeft, LuChevronRight, LuTrash, LuMoveHorizontal } from "react-icons/lu";
@@ -15,6 +15,8 @@ import {
   mergeAll,
   mergeLeft,
   mergeRight,
+  selectDisplayDuration,
+  selectDurationInSeconds,
   selectIsCurrentSegmentAlive,
   selectTimelineZoom,
   setTimelineZoom,
@@ -30,6 +32,7 @@ import { ThemedTooltip } from "./Tooltip";
 import { Slider } from "@mui/material";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ProtoButton } from "@opencast/appkit";
+import Select, { components } from "react-select";
 
 /**
  * Defines the different actions a user can perform while in cutting mode
@@ -179,6 +182,7 @@ const CuttingActions: React.FC = () => {
           hotkeyNameOut: rewriteKeys(KEYMAP.cutting.zoomOut),
         })}
       />
+      <ZoomDropdown />
       {/* <CuttingActionsButton Icon={faQuestion} actionName="Reset changes" action={null}
         tooltip="Not implemented"
         ariaLabelText="Reset changes. Not implemented"
@@ -362,6 +366,77 @@ const ZoomSlider : React.FC<ZoomSliderInterface> = ({
         />
       </div>
     </ThemedTooltip>
+  );
+};
+
+const ZoomDropdown : React.FC = () => {
+  const theme = useTheme();
+  const dispatch = useAppDispatch();
+  const seconds = useAppSelector(selectDisplayDuration);
+  const durationInSeconds = useAppSelector(selectDurationInSeconds);
+
+  const options = [
+    {
+      label: "All",
+      value: "0",
+    },
+  ];
+  if (durationInSeconds > 60) {
+    options.push({
+      label: "10 s",
+      value: "1",
+    });
+  }
+  if (durationInSeconds > 60 * 10) {
+    options.push({
+      label: "1 m",
+      value: (1 - (60 / durationInSeconds)).toString(),
+    });
+  }
+  if (durationInSeconds > 300 * 5) {
+    options.push({
+      label: "5 m",
+      value: (1 - (300 / durationInSeconds)).toString(),
+    });
+  }
+
+  const renderTime = (seconds: number) => {
+    const minutes = seconds / 60;
+    const hours = seconds / 3600;
+
+    if (hours >= 1) {
+      return Math.round(hours) + " h";
+    }
+    if (minutes >= 1) {
+      return Math.round(minutes) + " m";
+    }
+
+    return Math.round(seconds) + " s";
+  };
+
+  // @ts-expect-error No proper type for children available
+  const Control = ({ children, ...props }) => (
+    // @ts-expect-error And therefore this complains as well
+    <components.Control {...props}>
+      <div style={{ paddingLeft: "5px", paddingRight: "5px" }}>
+        ~{renderTime(seconds)}
+      </div>
+      {children[1]}
+    </components.Control>
+  );
+
+  return (
+    <Select
+      name="Zoom Dropdown"
+      styles={selectFieldStyle(theme)}
+      options={options}
+      onChange={option => {
+        if (option) {
+          dispatch(setTimelineZoom(parseFloat(option.value)));
+        }
+      }}
+      components={{ Control }}
+    />
   );
 };
 

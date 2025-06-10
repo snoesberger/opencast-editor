@@ -17,6 +17,7 @@ import {
   selectTimelineZoom,
   moveCut,
   selectDurationInSeconds,
+  selectDisplayDuration,
 } from "../redux/videoSlice";
 
 import { LuMenu } from "react-icons/lu";
@@ -67,13 +68,13 @@ const Timeline: React.FC<{
   const duration = useAppSelector(selectDuration);
   const durationInSeconds = useAppSelector(selectDurationInSeconds);
   const timelineZoom = useAppSelector(selectTimelineZoom);
+  const displayDuration = useAppSelector(selectDisplayDuration);
 
   const scrubberRef = useRef<HTMLDivElement | null>(null);
   const { ref, width = 1 } = useResizeObserver<HTMLDivElement>();
   const scrollContainerRef = useRef<HTMLElement>(null);
   const { width: scrollContainerWidth = 1 } = useResizeObserver<HTMLElement>({ ref: scrollContainerRef });
   const topOffset = 20;
-  const minDisplayTime = 10; // in seconds, what is shown at max zoom
 
   const currentlyScrolling = useRef(false);
   const zoomCenter = useRef(0);
@@ -92,15 +93,11 @@ const Timeline: React.FC<{
     zoomCenter.current = (scrubberVisible ? scrubberPosition : centerPosition) / width;
   };
 
-  const getDisplayPercentage = (zoomValue: number) => {
-    const displayDuration = (1 - zoomValue) * (durationInSeconds - minDisplayTime) + minDisplayTime;
-    return (durationInSeconds / displayDuration);
+  const displayPercentage = (durationInSeconds / displayDuration);
+  const getWaveformWidth = (baseWidth: number) => {
+    return baseWidth * displayPercentage;
   };
-  const getWaveformWidth = (baseWidth: number, zoomValue: number) => {
-    return baseWidth * getDisplayPercentage(zoomValue);
-  };
-  const displayPercentage = getDisplayPercentage(timelineZoom);
-  const zoomedWidth = getWaveformWidth(scrollContainerWidth, timelineZoom);
+  const zoomedWidth = getWaveformWidth(scrollContainerWidth);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(updateScroll, [currentlyAt, timelineZoom, width, scrollContainerWidth]);
