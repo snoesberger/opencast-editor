@@ -1,6 +1,13 @@
 import React from "react";
 
-import { BREAKPOINTS, basicButtonStyle, customIconStyle, selectFieldStyle, undisplay } from "../cssStyles";
+import {
+  BREAKPOINTS,
+  MyOptionType,
+  basicButtonStyle,
+  customIconStyle,
+  selectFieldStyle,
+  undisplay,
+} from "../cssStyles";
 
 import { IconType } from "react-icons";
 import { LuScissors, LuChevronLeft, LuChevronRight, LuTrash, LuMoveHorizontal } from "react-icons/lu";
@@ -24,7 +31,7 @@ import {
   timelineZoomOut,
 } from "../redux/videoSlice";
 import { KEYMAP, rewriteKeys } from "../globalKeys";
-import { ActionCreatorWithoutPayload, ActionCreatorWithPayload } from "@reduxjs/toolkit";
+import { ActionCreatorWithoutPayload, ActionCreatorWithPayload, PayloadActionCreator } from "@reduxjs/toolkit";
 
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../themes";
@@ -32,7 +39,7 @@ import { ThemedTooltip } from "./Tooltip";
 import { Slider } from "@mui/material";
 import { useHotkeys } from "react-hotkeys-hook";
 import { ProtoButton } from "@opencast/appkit";
-import Select, { components } from "react-select";
+import Select, { components, SingleValue } from "react-select";
 
 /**
  * Defines the different actions a user can perform while in cutting mode
@@ -50,11 +57,10 @@ const CuttingActions: React.FC = () => {
    * @param action redux event to dispatch
    * @param ref Pass a reference if the clicked element should lose focus
    */
-  const dispatchAction = (
+  const dispatchAction = <T, >(
     action: ActionCreatorWithoutPayload<string> | undefined,
-    actionWithPayload?: ActionCreatorWithPayload<number, string>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payload?: any,
+    actionWithPayload?: PayloadActionCreator<T, string>,
+    payload?: T,
     ref?: React.RefObject<HTMLButtonElement>,
   ) => {
     if (action) {
@@ -426,11 +432,11 @@ const ZoomDropdown : React.FC = () => {
   );
 
   return (
-    <Select
+    <Select<MyOptionType, false>
       name="Zoom Dropdown"
       styles={selectFieldStyle(theme)}
       options={options}
-      onChange={option => {
+      onChange={(option: SingleValue<MyOptionType>) => {
         if (option) {
           dispatch(setTimelineZoom(parseFloat(option.value)));
         }

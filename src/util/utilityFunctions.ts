@@ -212,3 +212,9 @@ export function outOfBounds(array: unknown[], index: number) {
   }
   return false;
 }
+
+// Typeguard for Dates
+export function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !isNaN(value.getTime());
+}
+

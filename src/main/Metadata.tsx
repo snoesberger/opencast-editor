@@ -269,6 +269,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
 
 
   const currentSelectValue = isMulti
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     ? selectOptions.filter(opt => (localValue as unknown as string[]).includes(opt.value))
     : selectOptions.find(opt => opt.value === localValue);
 
@@ -279,9 +280,10 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (selected: any) => {
     if (isMulti) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       setLocalValue(selected?.map((s: any) => s.value) ?? []);
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setLocalValue(selected?.value ?? "");
     }
   };

@@ -1,4 +1,12 @@
-import { BackendModule, InitOptions, MultiReadCallback, ReadCallback, ResourceLanguage, Services } from "i18next";
+import {
+  BackendModule,
+  InitOptions,
+  MultiReadCallback,
+  ReadCallback,
+  ResourceKey,
+  ResourceLanguage,
+  Services,
+} from "i18next";
 import { languages } from "./lngs-generated";
 
 export default class LazyLoadingPlugin implements BackendModule {
@@ -15,8 +23,9 @@ export default class LazyLoadingPlugin implements BackendModule {
 
   read(language: string, _namespace: string, callback: ReadCallback): void {
     const lng = languages.get(language);
+    type JsonModule = { default: ResourceKey };
     import(`./locales/${lng}.json`).then(
-      obj => {
+      (obj: JsonModule) => {
         callback(null, obj);
       },
     );

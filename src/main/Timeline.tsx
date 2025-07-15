@@ -627,8 +627,8 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
         xhr.open("GET", videoURL);
         xhr.responseType = "blob";
         xhr.onload = () => {
-          blob = xhr.response;
-          const file = new File([blob], blob);
+          blob = xhr.response as Blob;
+          const file = new File([blob], "waveform" + _index);
 
           // Start waveform worker with blob
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

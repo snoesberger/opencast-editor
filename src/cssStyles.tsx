@@ -166,7 +166,7 @@ export const ariaLive = css({
   overflow: "hidden",
 });
 
-type MyOptionType = {
+export type MyOptionType = {
   label: string;
   value: string;
 };

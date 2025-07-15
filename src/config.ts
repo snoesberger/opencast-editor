@@ -199,6 +199,7 @@ const loadContextSettings = async () => {
   // server root.
   const settingsPath = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
   const base = settingsPath.startsWith("/") ? "" : basepath;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const url = new URL(base.concat(settingsPath), window.location.origin);
   let response;
   try {
@@ -248,6 +249,7 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const validate = (schema: any, obj: Record<string, any> | null, path: string) => {
     if (typeof schema === "function") {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return validateValue(schema, obj, path);
     } else {
       return validateObj(schema, obj, path);
@@ -286,6 +288,7 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
     for (const key in obj) {
       const newPath = path ? `${path}.${key}` : key;
       if (key in schema) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const value = validate(schema[key], obj[key], newPath);
 
         // If `null` is returned, the validation failed and we ignore this

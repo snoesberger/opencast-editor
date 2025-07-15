@@ -318,8 +318,25 @@ const videoSlice = createSlice({
         state.status = "loading";
       });
     builder.addCase(
-      fetchVideoInformation.fulfilled, (state, { payload }) => {
+      fetchVideoInformation.fulfilled, (state, action: PayloadAction<{
+        segments: Omit<Segment, "id">[],
+        workflows: video["workflows"],
+        tracks: video["tracks"],
+        title: video["title"],
+        date: string, // Date string
+        duration: video["duration"],
+        workflow_active: boolean,
+        locking_active: video["lockingActive"],
+        lock_refresh: video["lockRefresh"],
+        lock_uuid: video["lock"]["uuid"],
+        lock_user: video["lock"]["user"], // username
+        waveformURIs: string[],
+        subtitles: video["subtitlesFromOpencast"],
+        local: boolean,
+        customizedTrackSelection: boolean, // TODO: Figure out if this still exists
+      }>) => {
         state.status = "success";
+        const payload = action.payload;
 
         if (payload.workflow_active) {
           state.status = "failed";
@@ -433,14 +450,14 @@ const updateActiveSegment = (state: video) => {
 /**
  * Helper Function for testing with current/old editor API
  */
-export const parseSegments = (segments: Segment[], duration: number) => {
+export const parseSegments = (segments: Omit<Segment, "id">[], duration: number) => {
   const newSegments: Segment[] = [];
 
   if (segments.length === 0) {
     newSegments.push({ id: nanoid(), start: 0, end: duration, deleted: false });
   }
 
-  segments.forEach((segment: Segment) => {
+  segments.forEach((segment: Omit<Segment, "id">) => {
     newSegments.push({ id: nanoid(), start: segment.start, end: segment.end, deleted: segment.deleted });
   });
   return newSegments;
