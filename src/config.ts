@@ -229,7 +229,7 @@ const loadContextSettings = async () => {
     return parse(await response.text());
   } catch (e) {
     console.error(`Could not parse "${settingsPath}" as TOML: `, e);
-    throw new SyntaxError(`Could not parse "${settingsPath}" as TOML: ${e}`);
+    throw new SyntaxError(`Could not parse "${settingsPath}" as TOML: ${String(e)}`);
   }
 
 };
@@ -269,7 +269,7 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
     } catch (e) {
       console.warn(
         `Validation of setting "${path}" (${sourceDescription}) with value "${JSON.stringify(value)}" failed: `
-        + `${e}. Ignoring.`,
+        + `${String(e)}. Ignoring.`,
       );
       return null;
     }
