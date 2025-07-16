@@ -201,9 +201,8 @@ const loadContextSettings = async () => {
   // given and starts with "/", it is interpreted as absolute path from the
   // server root.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const settingsPath = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
+  const settingsPath: string = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
   const base = settingsPath.startsWith("/") ? "" : basepath;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const url = new URL(base.concat(settingsPath), window.location.origin);
   let response;
   try {

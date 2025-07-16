@@ -12,7 +12,6 @@ export default [
     rules: {
       // // TODO: We want to turn these on eventually
       "@typescript-eslint/no-floating-promises": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-return": "off",
     },

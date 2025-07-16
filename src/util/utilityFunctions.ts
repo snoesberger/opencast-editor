@@ -44,7 +44,7 @@ export function safeJsonParse(str: string) {
  * Converts a working subtitle representation into a string
  */
 export function serializeSubtitle(subtitle: SubtitleCue[]): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const seri = new WebVTTSerializer();
 
   // Fix cues to work with serialize
@@ -80,6 +80,7 @@ export function serializeSubtitle(subtitle: SubtitleCue[]): string {
 
     cueIndex++;
   }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return seri.serialize(cues);
 }
 
@@ -98,9 +99,9 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
     throw new Error("File is empty");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const parser = new WebVTTParser();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const tree = parser.parse(subtitle, "metadata");
   if (tree.errors.length !== 0) {
 
