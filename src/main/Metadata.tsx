@@ -240,7 +240,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           descLabel = t(`metadata.${field.name}.${key.replaceAll(".", "-")}` as ParseKeys);
 
           if (field.name === "license") {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             descLabel = t(`metadata.${field.name}.${JSON.parse(key).label.replaceAll(".", "-")}` as ParseKeys);
           }
         }
@@ -284,10 +284,10 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
   const handleSelectChange = (selected: any) => {
     if (isMulti) {
       // eslint-disable-next-line max-len
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       setLocalValue(selected?.map((s: any) => s.value) ?? []);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       setLocalValue(selected?.value ?? "");
     }
   };

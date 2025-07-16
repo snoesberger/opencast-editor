@@ -636,12 +636,14 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
             type: "img", width: "2000", height: "230", samples: 100000, media: file,
           });
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.onerror = (error: string) => {
             setWaveformWorkerError(true);
             console.log("Waveform could not be generated:" + error);
           };
 
           // When done, save path to generated waveform img
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.oncomplete = (image: string, _numSamples: number) => {
             newImages.push(image);
             waveformsProcessed++;

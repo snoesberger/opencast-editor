@@ -40,11 +40,12 @@ export function safeJsonParse(str: string) {
   }
 }
 
+// eslint-disable-next-line max-len
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 /**
  * Converts a working subtitle representation into a string
  */
 export function serializeSubtitle(subtitle: SubtitleCue[]): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const seri = new WebVTTSerializer();
 
   // Fix cues to work with serialize
@@ -80,7 +81,6 @@ export function serializeSubtitle(subtitle: SubtitleCue[]): string {
 
     cueIndex++;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return seri.serialize(cues);
 }
 
@@ -99,9 +99,7 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
     throw new Error("File is empty");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const parser = new WebVTTParser();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const tree = parser.parse(subtitle, "metadata");
   if (tree.errors.length !== 0) {
 
@@ -120,14 +118,12 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
   for (const cue of tree.cues) {
     if (!cue.id) {
       cue.idInternal = nanoid();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       tree.cues[index] = cue;
     }
 
     // Turn times into milliseconds
     cue.startTime = cue.startTime * 1000;
     cue.endTime = cue.endTime * 1000;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     tree.cues[index] = cue;
 
     index++;
@@ -135,6 +131,8 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
 
   return tree.cues;
 }
+// eslint-disable-next-line max-len
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 /**
  * Parse language code to language name

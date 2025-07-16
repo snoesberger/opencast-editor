@@ -427,6 +427,7 @@ const ZoomDropdown : React.FC = () => {
       <div style={{ paddingLeft: "5px", paddingRight: "5px" }}>
         ~{renderTime(seconds)}
       </div>
+      {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
       {children[1]}
     </components.Control>
   );

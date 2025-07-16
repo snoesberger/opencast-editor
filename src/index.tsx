@@ -44,8 +44,8 @@ initialize.then(
     );
   },
 
-  // This error case is vey unlikely to occur.
-  e => root.render(<p>
+  // This error case is very unlikely to occur.
+  (e: Error) => root.render(<p>
     {`Fatal error while loading app: ${e.message}`}
     <br />
     This might be caused by a incorrect configuration by the system administrator.
