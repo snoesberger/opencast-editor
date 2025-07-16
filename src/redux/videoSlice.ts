@@ -84,6 +84,24 @@ export const initialState: video & httpRequestState = {
   errorReason: "unknown",
 };
 
+type FetchVideoInformation = {
+  segments: Omit<Segment, "id">[],
+  workflows: video["workflows"],
+  tracks: video["tracks"],
+  title: video["title"],
+  date: string, // Date string
+  duration: video["duration"],
+  workflow_active: boolean,
+  locking_active: video["lockingActive"],
+  lock_refresh: video["lockRefresh"],
+  lock_uuid: video["lock"]["uuid"],
+  lock_user: video["lock"]["user"], // username
+  waveformURIs: string[],
+  subtitles: video["subtitlesFromOpencast"],
+  local: boolean,
+  customizedTrackSelection: boolean, // TODO: Figure out if this still exists
+}
+
 export const fetchVideoInformation = createAppAsyncThunk("video/fetchVideoInformation", async () => {
   if (!settings.id) {
     throw new Error("Missing media package identifier");
@@ -91,7 +109,7 @@ export const fetchVideoInformation = createAppAsyncThunk("video/fetchVideoInform
 
   // const response = await client.get("https://legacy.opencast.org/admin-ng/tools/ID-dual-stream-demo/editor.json")
   const response = await client.get(`${settings.opencast.url}/editor/${settings.id}/edit.json`);
-  return JSON.parse(response);
+  return JSON.parse(response) as FetchVideoInformation;
 });
 
 const updateCurrentlyAt = (state: video, milliseconds: number) => {
@@ -318,23 +336,7 @@ const videoSlice = createSlice({
         state.status = "loading";
       });
     builder.addCase(
-      fetchVideoInformation.fulfilled, (state, action: PayloadAction<{
-        segments: Omit<Segment, "id">[],
-        workflows: video["workflows"],
-        tracks: video["tracks"],
-        title: video["title"],
-        date: string, // Date string
-        duration: video["duration"],
-        workflow_active: boolean,
-        locking_active: video["lockingActive"],
-        lock_refresh: video["lockRefresh"],
-        lock_uuid: video["lock"]["uuid"],
-        lock_user: video["lock"]["user"], // username
-        waveformURIs: string[],
-        subtitles: video["subtitlesFromOpencast"],
-        local: boolean,
-        customizedTrackSelection: boolean, // TODO: Figure out if this still exists
-      }>) => {
+      fetchVideoInformation.fulfilled, (state, action: PayloadAction<FetchVideoInformation>) => {
         state.status = "success";
         const payload = action.payload;
 
