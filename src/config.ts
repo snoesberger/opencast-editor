@@ -134,6 +134,7 @@ export const init = async () => {
 
   // Get settings from config file
   await loadContextSettings().then(result => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     configFileSettings = validate(result, false, SRC_SERVER, "from server settings file");
   });
 
@@ -164,11 +165,13 @@ export const init = async () => {
       if (!(segment in obj)) {
         obj[segment] = {};
       }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       obj = obj[segment];
     });
     obj[segments[segments.length - 1]] = value;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   urlParameterSettings = validate(rawUrlSettings, true, SRC_URL, "given as URL GET parameter");
 
   // Combine results
@@ -197,6 +200,7 @@ const loadContextSettings = async () => {
   // Construct path to settings file. If the `VITE_APP_SETTINGS_PATH` is
   // given and starts with "/", it is interpreted as absolute path from the
   // server root.
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const settingsPath = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
   const base = settingsPath.startsWith("/") ? "" : basepath;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -266,6 +270,7 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
     path: string,
   ) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const newValue = validation(value, allowParse, src);
       return newValue === undefined ? value : newValue;
     } catch (e) {
@@ -288,12 +293,13 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
     for (const key in obj) {
       const newPath = path ? `${path}.${key}` : key;
       if (key in schema) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
         const value = validate(schema[key], obj[key], newPath);
 
         // If `null` is returned, the validation failed and we ignore this
         // value.
         if (value !== null) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           out[key] = value;
         }
       } else {

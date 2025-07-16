@@ -216,7 +216,7 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   }, [timelineWidth]);
 
   // Callback for when the scrubber gets dragged by the user
-  const onControlledDrag: DraggableEventHandler = debounce((_e, position) => {
+  const onControlledDrag: DraggableEventHandler = debounce((_e, position: { x: number, y : number }) => {
     // Update position
     const { x } = position;
     dispatch(setCurrentlyAt((x / timelineWidth) * (duration)));

@@ -251,7 +251,9 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
 
         // Add to library
         library.push({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           value: value,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           label: descLabel ? descLabel : value,
         });
       });

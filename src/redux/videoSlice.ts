@@ -373,7 +373,6 @@ const videoSlice = createSlice({
           (track: Track) => { return { id: track.id, uri: track.thumbnailUri }; },
         );
 
-        state.aspectRatios = new Array(state.videoCount);
         state.lockingActive = payload.locking_active;
         state.lockRefresh = payload.lock_refresh;
         state.lock.uuid = payload.lock_uuid;

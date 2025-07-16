@@ -71,7 +71,7 @@ export const subtitleSlice = createSlice({
     setCurrentlyAtInSeconds: (state, action: PayloadAction<subtitle["currentlyAt"]>) => {
       updateCurrentlyAt(state, roundToDecimalPlace(action.payload * 1000, 0));
     },
-    setClickTriggered: (state, action) => {
+    setClickTriggered: (state, action: PayloadAction<subtitle["clickTriggered"]>) => {
       state.clickTriggered = action.payload;
     },
     setSubtitle: (state, action: PayloadAction<{ identifier: string, subtitles: SubtitlesInEditor; }>) => {
