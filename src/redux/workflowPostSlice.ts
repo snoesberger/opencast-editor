@@ -3,6 +3,7 @@ import { client } from "../util/client";
 import { Segment, PostEditArgument, httpRequestState } from "../types";
 import { settings } from "../config";
 import { createAppAsyncThunk } from "./createAsyncThunkWithTypes";
+import { selectCatalogById, selectCatalogIds, selectFieldById } from "./metadataSlice";
 
 const initialState: httpRequestState = {
   status: "idle",
@@ -11,10 +12,32 @@ const initialState: httpRequestState = {
 };
 
 export const postVideoInformation =
-  createAppAsyncThunk("video/postVideoInformation", async (argument: PostEditArgument) => {
+  createAppAsyncThunk("video/postVideoInformation", async (argument: PostEditArgument, { getState }) => {
     if (!settings.id) {
       throw new Error("Missing media package id");
     }
+
+    // Transform
+    const state = getState();
+    const catalogsJson = selectCatalogIds(state).map(catId => {
+      const cat = selectCatalogById(state, catId);
+
+      const fieldsJson = cat.fieldIds.map(fieldId => {
+        const field = selectFieldById(state, fieldId);
+
+        // Remove internal keys (`id`, `catalogId`) & restore original field `id`
+        const { catalogId, id: compositeId, ...rest } = field;
+        const originalId = compositeId.split(":")[1];          // after `${catalogId}:`
+
+        return { ...rest, id: originalId, collection: undefined };
+      });
+
+      return {
+        flavor: cat.flavor,
+        title: cat.title,
+        fields: fieldsJson,
+      };
+    });
 
     const response = await client.post(`${settings.opencast.url}/editor/${settings.id}/edit.json`,
       {
@@ -23,7 +46,7 @@ export const postVideoInformation =
         customizedTrackSelection: argument.customizedTrackSelection,
         subtitles: argument.subtitles,
         workflows: argument.workflow,
-        metadataJSON: JSON.stringify(argument.metadata),
+        metadataJSON: JSON.stringify(catalogsJson),
       },
     );
     return response;

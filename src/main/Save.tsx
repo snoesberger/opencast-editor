@@ -25,7 +25,6 @@ import { useTranslation } from "react-i18next";
 import {
   setHasChanges as metadataSetHasChanges,
   selectHasChanges as metadataSelectHasChanges,
-  selectCatalogs,
 } from "../redux/metadataSlice";
 import {
   selectSubtitles, selectHasChanges as selectSubtitleHasChanges,
@@ -125,7 +124,6 @@ export const SaveButton: React.FC<{
   const tracks = useAppSelector(selectTracks);
   const customizedTrackSelection = useAppSelector(selectCustomizedTrackSelection);
   const subtitles = useAppSelector(selectSubtitles);
-  const metadata = useAppSelector(selectCatalogs);
   const selectedWorkflowId = useAppSelector(selectSelectedWorkflowId);
   const workflowStatus = useAppSelector(selectStatus);
   const theme = useTheme();
@@ -166,7 +164,6 @@ export const SaveButton: React.FC<{
       tracks: tracks,
       customizedTrackSelection,
       subtitles: prepareSubtitles(),
-      metadata: metadata,
       workflow: selectedWorkflowId ? [{ id: selectedWorkflowId }] : undefined,
     }));
   };
