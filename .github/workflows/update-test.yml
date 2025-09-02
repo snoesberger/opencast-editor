@@ -122,7 +122,7 @@ jobs:
           
       - name: update CSS and other assets
         if: github.ref == 'refs/heads/develop'
-        run: cp -r .github/assets admin-interface-test/
+        run: cp -r .github/assets editor-test/
 
       - name: Commit new version
         working-directory: editor-test
