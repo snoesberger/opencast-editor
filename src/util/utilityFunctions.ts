@@ -2,6 +2,7 @@ import { nanoid } from "@reduxjs/toolkit";
 import { WebVTTParser, WebVTTSerializer } from "webvtt-parser";
 import { ExtendedSubtitleCue, SubtitleCue } from "../types";
 import { useEffect, useState, useRef } from "react";
+import i18next from "i18next";
 
 export const roundToDecimalPlace = (num: number, decimalPlace: number) => {
   const decimalFactor = Math.pow(10, decimalPlace);
@@ -131,7 +132,7 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
 
 /**
  * Parse language code to language name
- * Returns language name in the language set in the browser
+ * Returns language name in the language set by the user
  * Returns undefined if the input was undefined or the language code could not
  * be parsed
  */
@@ -139,8 +140,8 @@ export function languageCodeToName(lang: string | undefined): string | undefined
   if (!lang) {
     return undefined;
   }
-  const browserLang = window.navigator.language;
-  const languageNames = new Intl.DisplayNames(browserLang, { type: "language" });
+  const currentLang = i18next.resolvedLanguage;
+  const languageNames = new Intl.DisplayNames(currentLang, { type: "language" });
   try {
     return languageNames.of(lang.trim());
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

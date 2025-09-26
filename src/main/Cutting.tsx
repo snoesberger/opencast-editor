@@ -26,7 +26,7 @@ import { useTheme } from "../themes";
 import { setError } from "../redux/errorSlice";
 import { selectTitleFromEpisodeDc } from "../redux/metadataSlice";
 import { titleStyle, titleStyleBold, videosStyle } from "../cssStyles";
-import { LuMoveHorizontal } from "react-icons/lu";
+import { LuHourglass } from "react-icons/lu";
 import { css } from "@emotion/react";
 import VideoPlayers from "./VideoPlayers";
 import VideoControls from "./VideoControls";
@@ -58,7 +58,7 @@ const Cutting: React.FC = () => {
           error: true,
           errorTitle: t("error.workflowActive-errorTitle"),
           errorMessage: t("error.workflowActive-errorMessage"),
-          errorIcon: LuMoveHorizontal,
+          errorIcon: LuHourglass,
         }));
       } else {
         dispatch(setError({
