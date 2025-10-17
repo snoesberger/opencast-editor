@@ -14,16 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out source code
-      uses: actions/checkout@v4
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-    - name: Install Node Dependency
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - name: Get Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Run npm ci
+        run: npm ci
 
-    - name: Execute Vitest tests
-      run: npm run test
+      - name: Execute Vitest tests
+        run: npm run test
