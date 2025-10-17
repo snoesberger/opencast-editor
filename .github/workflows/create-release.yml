@@ -1,7 +1,7 @@
+name: Release » Create release tag
+
 on:
   workflow_dispatch:
-
-name: Create release tag
 
 jobs:
   build:

@@ -1,4 +1,4 @@
-name: Publish Pull Request Page
+name: PRs » Publish Pull Request Page
 
 on:
   pull_request_target:

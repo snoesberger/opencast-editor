@@ -1,4 +1,4 @@
-name: Vitest tests
+name: Build » Vitest tests
 
 on:
   push:
