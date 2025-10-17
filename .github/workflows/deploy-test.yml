@@ -12,9 +12,7 @@ concurrency:
 
 jobs:
   detect:
-    needs: member
-    if: ${{ needs.member.outputs.is_team_member == 'true'
-      || github.event.pull_request.head.repo.full_name == 'opencast/opencast-editor' }}
+    if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
     outputs:
       server: ${{ steps.test-server.outputs.server }}
@@ -142,6 +140,9 @@ jobs:
             It might take a few minutes for it to become available.
 
 
+  #This is currently defunct, but kept around in case we run into issues in the future
+  # where this check might be handy, cf spammers filing PRs or something.
+  # Previously we checked is_team_member prior to doing anything else above
   member:
     name: Check organization membership
     if: github.repository_owner == 'opencast'
