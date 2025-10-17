@@ -40,15 +40,15 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Get Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Clean install
+      - name: Run npm ci
         run: npm ci
 
-      - name: Build App
+      - name: Build the app
         run: |
           # This set the editor's datasource to the relevant test server
           sed -i "s#develop.opencast.org#$SERVER#g" public/editor-settings.toml
@@ -65,7 +65,7 @@ jobs:
 
       - name: Prepare git
         run: |
-          git config --global user.name "Release Bot"
+          git config --global user.name "Editor Deployment Bot"
           git config --global user.email "cloud@opencast.org"
 
       - name: Commit new version
