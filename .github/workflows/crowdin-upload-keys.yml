@@ -19,8 +19,8 @@ jobs:
 
     - name: Prepare crowdin client
       run: |
-        wget --quiet https://artifacts.crowdin.com/repo/deb/crowdin3.deb -O crowdin.deb
-        sudo dpkg -i crowdin.deb
+        wget --quiet https://artifacts.crowdin.com/repo/deb/crowdin3.deb
+        sudo dpkg -i crowdin3.deb
 
     - name: Upload translation source
       env:
