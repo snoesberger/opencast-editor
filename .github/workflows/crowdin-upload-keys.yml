@@ -7,7 +7,7 @@ on:
       - r/*
 
 concurrency:
-  group: crowdin
+  group: crowdin-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -26,4 +26,4 @@ jobs:
       env:
         CROWDIN_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
       run: |
-        crowdin upload sources --config .crowdin.yaml -b main
+        crowdin upload sources --config .crowdin.yaml -b "${GITHUB_REF##*/}"
