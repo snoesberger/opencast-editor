@@ -38,7 +38,7 @@ jobs:
 
   deploy-pr:
     runs-on: ubuntu-latest
-    needs: detect
+    needs: detect-repo-owner
     steps:
       - name: Generate build path
         run: echo "build=${{github.event.number}}/$(date +%Y-%m-%d_%H-%M-%S)/" >> $GITHUB_OUTPUT
@@ -64,7 +64,7 @@ jobs:
           sed -i "s#develop.opencast.org#$SERVER#g" public/editor-settings.toml
           npm run build
         env:
-          SERVER: ${{needs.detect.outputs.server}}
+          SERVER: ${{needs.detect-repo-owner.outputs.server}}
           PUBLIC_URL: ${{ steps.build-path.outputs.build }}
 
       - name: Prepare git
