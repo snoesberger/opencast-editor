@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  detect:
+  detect-repo-owner:
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
     outputs:
@@ -36,7 +36,7 @@ jobs:
           #Strip the r/ prefix, giving us just 17.x.  If this is main/develop this does nothing
           echo "branch=${TEMP#r\/}" >> $GITHUB_OUTPUT
 
-  main:
+  deploy-pr:
     runs-on: ubuntu-latest
     needs: detect
     steps:
@@ -144,7 +144,7 @@ jobs:
   #This is currently defunct, but kept around in case we run into issues in the future
   # where this check might be handy, cf spammers filing PRs or something.
   # Previously we checked is_team_member prior to doing anything else above
-  member:
+  check-member:
     name: Check organization membership
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
@@ -175,7 +175,7 @@ jobs:
           exit: false
 
 
-  translations:
+  check-no-modified-translations:
     name: Translations only via Crowdin
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest

@@ -10,7 +10,7 @@ on:
       - r/*
 
 jobs:
-  test:
+  check-npm-test:
     runs-on: ubuntu-latest
 
     steps:
