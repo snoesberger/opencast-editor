@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { css } from "@emotion/react";
 import { BREAKPOINTS, calendarStyle, selectFieldStyle, titleStyle, titleStyleBold } from "../cssStyles";
@@ -286,10 +286,22 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
     }
   };
 
+  const handleDateConversion = useCallback((value: string) => {
+    let returnValue = value;
+    if (field && (field.type === "date" || field.type === "time")) {
+      if (returnValue !== "") { // Empty string is allowed
+        returnValue = new Date(returnValue).toJSON();
+      }
+    }
+    return returnValue;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field?.type]);
+
   // Set value in store, but debounced
   const debouncedCommit = useMemo(
     () =>
       debounce((newValue: string) => {
+        newValue = handleDateConversion(newValue);
         if (newValue !== field.value) {
           dispatch(
             setFieldValue({
@@ -299,7 +311,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           );
         }
       }, 500),
-    [dispatch, field.id, field.value],
+    [dispatch, field.id, field.value, handleDateConversion],
   );
 
   useEffect(() => {
