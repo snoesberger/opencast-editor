@@ -4,6 +4,7 @@
       "finish-button": "Finish",
       "select-tracks-button": "Tracks",
       "subtitles-button": "Subtitles",
+      "chapters-button": "Chapters",
       "thumbnail-button": "Thumbnail",
       "metadata-button": "Metadata",
       "keyboard-controls-button": "Keyboard Controls",
@@ -316,6 +317,10 @@
 
     "subtitleTimeline": {
       "overviewTimelineTooltip": "Timeline overview"
+    },
+
+    "chapters": {
+      "editTitle": "Chapter Editor"
     },
 
     "keyboardControls": {

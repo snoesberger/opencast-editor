@@ -69,6 +69,11 @@ interface iSettings {
     icons: { [key: string]: string; } | undefined,
     defaultVideoFlavor: Flavor | undefined,
   };
+  chapters: {
+    show: boolean,
+    mainFlavor: string,
+    defaultVideoFlavor: Flavor | undefined,
+  };
 }
 
 /**
@@ -107,6 +112,11 @@ const defaultSettings: iSettings = {
     mainFlavor: "captions",
     languages: {},
     icons: undefined,
+    defaultVideoFlavor: undefined,
+  },
+  chapters: {
+    show: false,
+    mainFlavor: "chapters",
     defaultVideoFlavor: undefined,
   },
 };
@@ -416,6 +426,11 @@ const SCHEMA = {
     mainFlavor: types.string,
     languages: types.objectsWithinObjects,
     icons: types.map,
+    defaultVideoFlavor: types.map,
+  },
+  chapters: {
+    show: types.boolean,
+    mainFlavor: types.string,
     defaultVideoFlavor: types.map,
   },
   thumbnail: {

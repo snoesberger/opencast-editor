@@ -6,6 +6,7 @@ import workflowPostReducer from "./workflowPostSlice";
 import endReducer from "./endSlice";
 import metadataReducer from "./metadataSlice";
 import subtitleReducer from "./subtitleSlice";
+import chapterReducer from "./chapterSlice";
 import errorReducer from "./errorSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
@@ -18,6 +19,7 @@ export const store = configureStore({
     endState: endReducer,
     metadataState: metadataReducer,
     subtitleState: subtitleReducer,
+    chapterState: chapterReducer,
     errorState: errorReducer,
   },
 });
@@ -26,6 +28,8 @@ export type AppDispatch = typeof store.dispatch;
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
+
+export type ThunkApiConfig = { state: RootState; dispatch: AppDispatch; rejectValue?: string };
 
 // Use instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch: () => AppDispatch = useDispatch;

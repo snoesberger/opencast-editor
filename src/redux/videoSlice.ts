@@ -20,6 +20,7 @@ export interface video {
   tracks: Track[],
   customizedTrackSelection: boolean, // Did user select tracks for processing
   subtitlesFromOpencast: SubtitlesFromOpencast[],
+  chaptersFromOpencast: SubtitlesFromOpencast[],
   activeSegmentIndex: number,     // Index of the segment that is currenlty hovered
   selectedWorkflowId: string,     // Id of the currently selected workflow
   aspectRatios: { width: number, height: number; }[],  // Aspect ratios of every video
@@ -56,6 +57,7 @@ export const initialState: video & httpRequestState = {
   tracks: [],
   customizedTrackSelection: false,
   subtitlesFromOpencast: [],
+  chaptersFromOpencast: [],
   activeSegmentIndex: 0,
   selectedWorkflowId: "",
   previewTriggered: false,
@@ -341,6 +343,8 @@ const videoSlice = createSlice({
         state.videoCount = state.videoURLs.length;
         state.subtitlesFromOpencast = payload.subtitles ?
           state.subtitlesFromOpencast = payload.subtitles : [];
+        state.chaptersFromOpencast = payload.chapters ?
+          state.chaptersFromOpencast = payload.chapters : [];
         state.duration = payload.duration;
         state.title = payload.title;
         state.segments = parseSegments(payload.segments, payload.duration);
@@ -402,6 +406,15 @@ const videoSlice = createSlice({
     selectSubtitlesFromOpencast: state => state.subtitlesFromOpencast,
     selectSubtitlesFromOpencastById: (state, id: string) => {
       for (const cap of state.subtitlesFromOpencast) {
+        if (cap.id === id) {
+          return cap;
+        }
+      }
+      return undefined;
+    },
+    selectChaptersFromOpencast: state => state.chaptersFromOpencast,
+    selectChaptersFromOpencastById: (state, id: string) => {
+      for (const cap of state.chaptersFromOpencast) {
         if (cap.id === id) {
           return cap;
         }
@@ -591,6 +604,8 @@ export const {
   selectAspectRatio,
   selectSubtitlesFromOpencast,
   selectSubtitlesFromOpencastById,
+  selectChaptersFromOpencast,
+  selectChaptersFromOpencastById,
   selectVideos,
 } = videoSlice.selectors;
 

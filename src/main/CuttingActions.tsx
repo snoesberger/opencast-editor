@@ -10,11 +10,7 @@ import { css } from "@emotion/react";
 
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
-  cut,
   markAsDeletedOrAlive,
-  mergeAll,
-  mergeLeft,
-  mergeRight,
   selectIsCurrentSegmentAlive,
   selectTimelineZoom,
   setTimelineZoom,
@@ -34,7 +30,19 @@ import { ProtoButton } from "@opencast/appkit";
 /**
  * Defines the different actions a user can perform while in cutting mode
  */
-const CuttingActions: React.FC = () => {
+const CuttingActions: React.FC<{
+  cut: ActionCreatorWithoutPayload<string>,
+  mergeAll: ActionCreatorWithoutPayload<string>,
+  mergeLeft: ActionCreatorWithoutPayload<string>,
+  mergeRight: ActionCreatorWithoutPayload<string>,
+  isDeleteButtonDisabled?: boolean,
+}> = ({
+  cut,
+  mergeAll,
+  mergeLeft,
+  mergeRight,
+  isDeleteButtonDisabled = false,
+}) => {
 
   const { t } = useTranslation();
 
@@ -130,10 +138,14 @@ const CuttingActions: React.FC = () => {
         tooltip={t("cuttingActions.cut-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
         ariaLabelText={t("cuttingActions.cut-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
       />
-      <div css={verticalLineStyle} />
-      <MarkAsDeletedButton actionHandler={dispatchAction} action={markAsDeletedOrAlive}
-        hotKeyName={rewriteKeys(KEYMAP.cutting.delete.key)}
-      />
+      {!isDeleteButtonDisabled &&
+        <>
+          <div css={verticalLineStyle} />
+          <MarkAsDeletedButton actionHandler={dispatchAction} action={markAsDeletedOrAlive}
+            hotKeyName={rewriteKeys(KEYMAP.cutting.delete.key)}
+          />
+        </>
+      }
       <div css={verticalLineStyle} />
       <CuttingActionsButton Icon={LuChevronLeft}
         actionName={t("cuttingActions.mergeLeft-button")}

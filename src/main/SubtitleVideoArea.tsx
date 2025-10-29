@@ -1,22 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { css } from "@emotion/react";
-import { useAppSelector } from "../redux/store";
-import {
-  selectCurrentlyAt,
-  selectIsPlaying,
-  setClickTriggered,
-  setIsPlaying,
-  selectClickTriggered,
-  selectPreviewTriggered,
-  setPreviewTriggered,
-  selectAspectRatio,
-  setAspectRatio,
-  selectCurrentlyAtInSeconds,
-  selectSelectedSubtitleById,
-  selectIsPlayPreview,
-  setIsPlayPreview,
-  setCurrentlyAtAndTriggerPreview,
-} from "../redux/subtitleSlice";
+import { RootState, ThunkApiConfig, useAppSelector } from "../redux/store";
 import {
   selectIsMuted,
   selectVideos,
@@ -26,7 +10,7 @@ import {
   setVolume,
   setJumpTriggered,
 } from "../redux/videoSlice";
-import { Flavor } from "../types";
+import { Flavor, SubtitlesInEditor } from "../types";
 import { settings } from "../config";
 import { useTranslation } from "react-i18next";
 import { serializeSubtitle } from "../util/utilityFunctions";
@@ -35,6 +19,7 @@ import { VideoPlayer } from "./VideoPlayers";
 import VideoControls from "./VideoControls";
 import Select from "react-select";
 import { selectFieldStyle } from "../cssStyles";
+import { ActionCreatorWithPayload, AsyncThunk } from "@reduxjs/toolkit";
 
 /**
  * A part of the subtitle editor that displays a video and related controls
@@ -45,7 +30,37 @@ import { selectFieldStyle } from "../cssStyles";
  * coming up with a proper fix appears to be rather difficult
  * TODO: Come up with a proper fix and create a PR
  */
-const SubtitleVideoArea: React.FC = () => {
+const SubtitleVideoArea: React.FC<{
+  selectIsPlaying: (state: RootState) => boolean,
+  selectCurrentlyAt: (state: RootState) => number,
+  selectCurrentlyAtInSeconds: (state: RootState) => number,
+  selectClickTriggered: (state: RootState) => boolean,
+  selectPreviewTriggered: (state: RootState) => boolean,
+  selectAspectRatio: (state: RootState) => number,
+  selectIsPlayPreview: (state: RootState) => boolean,
+  selectSelectedSubtitleById: (state: RootState) => SubtitlesInEditor,
+  setIsPlaying: ActionCreatorWithPayload<boolean, string>,
+  setPreviewTriggered: ActionCreatorWithPayload<boolean, string>,
+  setAspectRatio: ActionCreatorWithPayload<{ dataKey: number; } & { width: number, height: number; }, string>,
+  setIsPlayPreview: ActionCreatorWithPayload<boolean, string>,
+  setClickTriggered: ActionCreatorWithPayload<boolean, string>,
+  setCurrentlyAtAndTriggerPreview: AsyncThunk<void, number, ThunkApiConfig>,
+}> = ({
+  selectIsPlaying,
+  selectCurrentlyAt,
+  selectCurrentlyAtInSeconds,
+  selectClickTriggered,
+  selectPreviewTriggered,
+  selectAspectRatio,
+  selectIsPlayPreview,
+  selectSelectedSubtitleById,
+  setIsPlaying,
+  setPreviewTriggered,
+  setAspectRatio,
+  setIsPlayPreview,
+  setClickTriggered,
+  setCurrentlyAtAndTriggerPreview,
+}) => {
 
   const tracks = useAppSelector(selectVideos);
   const subtitle = useAppSelector(selectSelectedSubtitleById);

@@ -135,6 +135,24 @@ spanish = { lang = "es" }
 # "type" = "presentation"
 # "subtype" = "preview"
 
+###
+# Chapters
+##
+
+[chapters]
+
+# If the chapter editor appears in the main menu
+# Type: boolean
+# Default: false
+#show = false
+
+# The main flavor of the chapters track in Opencast
+# No other track should have the same main flavor as chapters track
+# Type: string
+# Default: "chapters"
+#mainFlavor = "chapters"
+
+
 ####
 # Thumbnail Selection
 ##

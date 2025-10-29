@@ -15,7 +15,7 @@ import {
 } from "../redux/subtitleSlice";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import useResizeObserver from "use-resize-observer";
-import { selectDuration } from "../redux/videoSlice";
+import { moveCut, selectActiveSegmentIndex, selectDuration, selectSegments } from "../redux/videoSlice";
 import Draggable, { DraggableEventHandler } from "react-draggable";
 import { SubtitleCue } from "../types";
 import { Resizable, ResizableProps } from "react-resizable";
@@ -166,6 +166,9 @@ const SubtitleTimeline: React.FC = () => {
               timelineHeight={120}
               styleByActiveSegment={false}
               tabable={false}
+              selectSegments={selectSegments}
+              selectActiveSegmentIndex={selectActiveSegmentIndex}
+              moveCut={moveCut}
             />
           </div>
         </div>
