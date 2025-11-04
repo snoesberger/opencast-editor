@@ -292,7 +292,7 @@ const SubtitleListSegment = React.memo((props: subtitleListSegmentProps) => {
         deleteCue();
         break;
     }
-  }, { enableOnFormTags: ["input", "select", "textarea"] }, [identifier, cue, props.index]);
+  }, { enableOnFormTags: ["input", "select", "textarea"], preventDefault: true }, [identifier, cue, props.index]);
 
   const setTimeToSegmentStart = () => {
     dispatch(setCurrentlyAt(cue.startTime));
