@@ -3,7 +3,7 @@ import React from "react";
 import { BREAKPOINTS, basicButtonStyle, customIconStyle, undisplay } from "../cssStyles";
 
 import { IconType } from "react-icons";
-import { LuScissors, LuChevronLeft, LuChevronRight, LuTrash, LuMoveHorizontal } from "react-icons/lu";
+import { LuScissors, LuChevronLeft, LuChevronRight, LuTrash, LuMoveHorizontal, LuBookmark } from "react-icons/lu";
 import TrashRestore from "../img/trash-restore.svg?react";
 
 import { css } from "@emotion/react";
@@ -31,17 +31,23 @@ import { ProtoButton } from "@opencast/appkit";
  * Defines the different actions a user can perform while in cutting mode
  */
 const CuttingActions: React.FC<{
-  cut: ActionCreatorWithoutPayload<string>,
-  mergeAll: ActionCreatorWithoutPayload<string>,
-  mergeLeft: ActionCreatorWithoutPayload<string>,
-  mergeRight: ActionCreatorWithoutPayload<string>,
+  cut?: ActionCreatorWithoutPayload<string>,
+  mergeAll?: ActionCreatorWithoutPayload<string>,
+  mergeLeft?: ActionCreatorWithoutPayload<string>,
+  mergeRight?: ActionCreatorWithoutPayload<string>,
   isDeleteButtonDisabled?: boolean,
+  add?: ActionCreatorWithoutPayload<string>,
+  deleteByMerge?: ActionCreatorWithoutPayload<string>,
+  deleteByMergeAll?: ActionCreatorWithoutPayload<string>,
 }> = ({
   cut,
   mergeAll,
   mergeLeft,
   mergeRight,
   isDeleteButtonDisabled = false,
+  add,
+  deleteByMerge,
+  deleteByMergeAll,
 }) => {
 
   const { t } = useTranslation();
@@ -129,58 +135,117 @@ const CuttingActions: React.FC<{
 
   return (
     <div css={cuttingStyle}>
-      <CuttingActionsButton Icon={LuScissors}
-        actionName={t("cuttingActions.cut-button")}
-        actionHandler={dispatchAction}
-        action={cut}
-        actionWithPayload={undefined}
-        payload={undefined}
-        tooltip={t("cuttingActions.cut-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
-        ariaLabelText={t("cuttingActions.cut-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
-      />
+      { cut &&
+        <>
+          <CuttingActionsButton Icon={LuScissors}
+            actionName={t("cuttingActions.cut-button")}
+            actionHandler={dispatchAction}
+            action={cut}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.cut-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
+            ariaLabelText={t("cuttingActions.cut-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
+      { add &&
+        <>
+          <CuttingActionsButton Icon={LuBookmark}
+            actionName={t("cuttingActions.add-button")}
+            actionHandler={dispatchAction}
+            action={add}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.add-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
+            ariaLabelText={t("cuttingActions.add-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.cut.key) })}
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
       {!isDeleteButtonDisabled &&
         <>
-          <div css={verticalLineStyle} />
           <MarkAsDeletedButton actionHandler={dispatchAction} action={markAsDeletedOrAlive}
             hotKeyName={rewriteKeys(KEYMAP.cutting.delete.key)}
           />
+          <div css={verticalLineStyle} />
         </>
       }
-      <div css={verticalLineStyle} />
-      <CuttingActionsButton Icon={LuChevronLeft}
-        actionName={t("cuttingActions.mergeLeft-button")}
-        actionHandler={dispatchAction}
-        action={mergeLeft}
-        actionWithPayload={undefined}
-        payload={undefined}
-        tooltip={t("cuttingActions.mergeLeft-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeLeft.key) })}
-        ariaLabelText={
-          t("cuttingActions.mergeLeft-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeLeft.key) })
-        }
-      />
-      <div css={verticalLineStyle} />
-      <CuttingActionsButton Icon={LuChevronRight}
-        actionName={t("cuttingActions.mergeRight-button")}
-        actionHandler={dispatchAction}
-        action={mergeRight}
-        actionWithPayload={undefined}
-        payload={undefined}
-        tooltip={t("cuttingActions.mergeRight-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeRight.key) })}
-        ariaLabelText={
-          t("cuttingActions.mergeRight-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeRight.key) })
-        }
-      />
-      <div css={verticalLineStyle} />
-      <CuttingActionsButton Icon={LuMoveHorizontal}
-        actionName={t("cuttingActions.merge-all-button")}
-        actionHandler={dispatchAction}
-        action={mergeAll}
-        actionWithPayload={undefined}
-        payload={undefined}
-        tooltip={t("cuttingActions.merge-all-tooltip")}
-        ariaLabelText={t("cuttingActions.merge-all-tooltip-aria")}
-      />
-      <div css={verticalLineStyle} />
+      { deleteByMerge &&
+        <>
+          <CuttingActionsButton Icon={LuTrash}
+            actionName={t("cuttingActions.delete-button")}
+            actionHandler={dispatchAction}
+            action={deleteByMerge}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.deleteByMerge-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.delete.key) })}
+            ariaLabelText={t("cuttingActions.deleteByMerge-tooltip-aria",
+              { hotkeyName: rewriteKeys(KEYMAP.cutting.delete.key) })}
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
+      { mergeLeft &&
+        <>
+          <CuttingActionsButton Icon={LuChevronLeft}
+            actionName={t("cuttingActions.mergeLeft-button")}
+            actionHandler={dispatchAction}
+            action={mergeLeft}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.mergeLeft-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeLeft.key) })}
+            ariaLabelText={
+              t("cuttingActions.mergeLeft-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeLeft.key) })
+            }
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
+      { mergeRight &&
+        <>
+          <CuttingActionsButton Icon={LuChevronRight}
+            actionName={t("cuttingActions.mergeRight-button")}
+            actionHandler={dispatchAction}
+            action={mergeRight}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.mergeRight-tooltip", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeRight.key) })}
+            ariaLabelText={
+              t("cuttingActions.mergeRight-tooltip-aria", { hotkeyName: rewriteKeys(KEYMAP.cutting.mergeRight.key) })
+            }
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
+      { mergeAll &&
+        <>
+          <CuttingActionsButton Icon={LuMoveHorizontal}
+            actionName={t("cuttingActions.merge-all-button")}
+            actionHandler={dispatchAction}
+            action={mergeAll}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.merge-all-tooltip")}
+            ariaLabelText={t("cuttingActions.merge-all-tooltip-aria")}
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
+      { deleteByMergeAll &&
+        <>
+          <CuttingActionsButton Icon={LuMoveHorizontal}
+            actionName={t("cuttingActions.delete-all-button")}
+            actionHandler={dispatchAction}
+            action={deleteByMergeAll}
+            actionWithPayload={undefined}
+            payload={undefined}
+            tooltip={t("cuttingActions.delete-all-tooltip")}
+            ariaLabelText={t("cuttingActions.delete-all-tooltip-aria")}
+          />
+          <div css={verticalLineStyle} />
+        </>
+      }
       <ZoomSlider actionHandler={dispatchAction}
         tooltip={t("cuttingActions.zoomSlider-tooltip", {
           hotkeyNameIn: rewriteKeys(KEYMAP.cutting.zoomIn),

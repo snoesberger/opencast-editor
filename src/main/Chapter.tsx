@@ -8,8 +8,6 @@ import {
   addCueAtIndex,
   cut,
   mergeAll,
-  mergeLeft,
-  mergeRight,
   removeCue,
   selectAspectRatio,
   selectClickTriggered,
@@ -38,6 +36,7 @@ import {
   setSubtitle,
   initializeSubtitle,
   setSelectedSubtitleId,
+  deleteByMerge,
 } from "../redux/chapterSlice";
 import { css } from "@emotion/react";
 import { useTheme } from "../themes";
@@ -193,10 +192,9 @@ const Chapter: React.FC = () => {
             isChapters={true}
           />
           <CuttingActions
-            cut={cut}
-            mergeAll={mergeAll}
-            mergeLeft={mergeLeft}
-            mergeRight={mergeRight}
+            add={cut}
+            deleteByMerge={deleteByMerge}
+            deleteByMergeAll={mergeAll}
             isDeleteButtonDisabled={true}
           />
         </>

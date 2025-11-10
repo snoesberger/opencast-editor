@@ -281,6 +281,10 @@ export const chapterSlice = createSlice({
       state.subtitles[state.selectedSubtitleId].cues[rightSegmentIndex].startTime = time;
       state.hasChanges = true;
     },
+    deleteByMerge: state => {
+      mergeSegments(state, state.activeSegmentIndex - 1, state.activeSegmentIndex);
+      state.hasChanges = true;
+    },
     mergeLeft: state => {
       mergeSegments(state, state.activeSegmentIndex, state.activeSegmentIndex - 1);
       state.hasChanges = true;
@@ -379,7 +383,7 @@ export const { setIsDisplayEditView, setIsPlaying, setIsPlayPreview, setPreviewT
   setCurrentlyAtInSeconds, setClickTriggered, setSubtitle, initializeSubtitle, removeSubtitle, setCues,
   setCueAtIndex, addCueAtIndex, removeCue, setSelectedSubtitleId, setFocusSegmentTriggered,
   setFocusSegmentId, setFocusSegmentTriggered2, setFocusToSegmentAboveId, setFocusToSegmentBelowId,
-  setAspectRatio, setHasChanges, cut, moveCut, mergeLeft, mergeRight, mergeAll,
+  setAspectRatio, setHasChanges, cut, moveCut, mergeLeft, mergeRight, mergeAll, deleteByMerge,
 } = chapterSlice.actions;
 
 export const {
