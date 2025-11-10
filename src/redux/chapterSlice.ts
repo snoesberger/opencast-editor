@@ -409,7 +409,7 @@ export const {
  * Will grab the state from videoState to skip past deleted segment if preview
  * mode is active.
  */
-export const setCurrentlyAtAndTriggerPreview = createAppAsyncThunk("subtitleState/setCurrentlyAtAndTriggerPreview",
+export const setCurrentlyAtAndTriggerPreview = createAppAsyncThunk("chapterState/setCurrentlyAtAndTriggerPreview",
   (milliseconds: number, { getState, dispatch }) => {
     milliseconds = roundToDecimalPlace(milliseconds, 0);
 
@@ -421,7 +421,7 @@ export const setCurrentlyAtAndTriggerPreview = createAppAsyncThunk("subtitleStat
     const segments: Segment[] = allStates.videoState.segments;
     let triggered = false;
 
-    if (allStates.subtitleState.isPlayPreview) {
+    if (allStates.chapterState.isPlayPreview) {
       for (let i = 0; i < segments.length; i++) {
         if (segments[i].start < milliseconds && segments[i].end > milliseconds) {
           if (segments[i].deleted) {
