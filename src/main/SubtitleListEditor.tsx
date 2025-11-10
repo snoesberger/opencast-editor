@@ -528,7 +528,7 @@ const SubtitleListSegment : React.FC<{
         css={[fieldStyle, textFieldStyle]}
         defaultValue={cue.text}
         onKeyDown={(event: React.KeyboardEvent) => {
-          if (event.key === "Enter" && !event.shiftKey) {
+          if (event.key === "Enter" && !event.shiftKey && isFunctionButtonEnabled) {
             event.preventDefault();
             addCueBelow();
           }
