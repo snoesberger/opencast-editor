@@ -237,10 +237,10 @@ export const chapterSlice = createSlice({
       const segmentB: SubtitleCue = {
         id: undefined,
         idInternal: nanoid(),
-        text: activeSegment.text,
+        text: "",
         startTime: state.currentlyAt,
         endTime: activeSegment.endTime,
-        tree: { children: [{ type: "text", value: activeSegment.text }] },
+        tree: { children: [{ type: "text", value: "" }] },
         // deleted: activeSegment.deleted,
       };
 
