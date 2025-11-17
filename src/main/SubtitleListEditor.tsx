@@ -494,6 +494,7 @@ const SubtitleListSegment : React.FC<{
   const fieldStyle = css({
     fontSize: "1em",
     marginLeft: "15px",
+    marginRight: "2px",
     borderRadius: "5px",
     borderWidth: "1px",
     padding: "10px 10px",
