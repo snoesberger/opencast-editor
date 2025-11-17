@@ -161,11 +161,14 @@ const Timeline: React.FC<{
             setIsPlaying={setIsPlaying}
           />
           <div css={{ position: "relative", height: timelineHeight + "px" }}>
-            <Waveforms timelineHeight={timelineHeight}/>
+            <Waveforms
+              timelineHeight={!isChapters ? timelineHeight : (timelineHeight / 4) * 3}
+              topOffset={!isChapters ? undefined : (timelineHeight / 4) * 1}
+            />
             {isChapters &&
               <SegmentsList
                 timelineWidth={width}
-                timelineHeight={timelineHeight / 2}
+                timelineHeight={(timelineHeight / 4) * 1}
                 styleByActiveSegment={styleByActiveSegment}
                 tabable={true}
                 selectSegments={chapterSelectSegments}
@@ -175,8 +178,8 @@ const Timeline: React.FC<{
             }
             <SegmentsList
               timelineWidth={width}
-              timelineHeight={!isChapters ? timelineHeight : timelineHeight / 2}
-              styleByActiveSegment={styleByActiveSegment}
+              timelineHeight={!isChapters ? timelineHeight : (timelineHeight / 4) * 3}
+              styleByActiveSegment={!isChapters ? styleByActiveSegment : false}
               tabable={true}
               selectSegments={selectSegments}
               selectActiveSegmentIndex={selectActiveSegmentIndex}
@@ -404,7 +407,6 @@ export const SegmentsList: React.FC<{
   moveCut,
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   // Init redux variables
   const segments = useAppSelector(selectSegments);
@@ -472,7 +474,6 @@ export const SegmentsList: React.FC<{
                       whiteSpace: "nowrap",
                       textOverflow: "ellipsis",
                       padding: "8px",
-                      color: `${theme.subtitle_segment_text}`,
                     }}
                   >
                     {segment.text}
@@ -497,8 +498,6 @@ export const SegmentsList: React.FC<{
   const segmentsStyle = css({
     display: "flex",
     flexDirection: "row",
-    // paddingTop: "10px",
-    height: "50%",
   });
 
   return (
@@ -627,7 +626,7 @@ export const CutMark: React.FC<{
 /**
  * Generates waveform images and displays them
  */
-export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeight }) => {
+export const Waveforms: React.FC<{ timelineHeight: number; topOffset?: number }> = ({ timelineHeight, topOffset }) => {
 
   const { t } = useTranslation();
 
@@ -649,7 +648,7 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
     ...(images.length <= 0) && { alignItems: "center" },  // Only center during loading
     width: "100%",
     height: timelineHeight + "px",   // CHECK IF     height: "100%",
-    // paddingTop: "10px",
+    paddingTop: topOffset,
     filter: `${theme.invert_wave}`,
     color: `${theme.inverted_text}`,
   });
