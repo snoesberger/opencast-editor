@@ -19,6 +19,10 @@ import {
   jumpToPreviousSegment,
   jumpToNextSegment,
   selectVideos,
+  cut,
+  mergeAll,
+  mergeLeft,
+  mergeRight,
 } from "../redux/videoSlice";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../redux/store";
@@ -109,7 +113,12 @@ const Cutting: React.FC = () => {
           setCurrentlyAt={setCurrentlyAt}
           setClickTriggered={setClickTriggered}
         />
-        <CuttingActions />
+        <CuttingActions
+          cut={cut}
+          mergeAll={mergeAll}
+          mergeLeft={mergeLeft}
+          mergeRight={mergeRight}
+        />
         <VideoControls
           selectCurrentlyAt={selectCurrentlyAt}
           selectIsPlaying={selectIsPlaying}

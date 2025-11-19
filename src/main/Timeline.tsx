@@ -8,15 +8,15 @@ import { css } from "@emotion/react";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import { Segment, httpRequestState } from "../types";
 import {
-  selectSegments,
-  selectActiveSegmentIndex,
   selectDuration,
   selectVideoURL,
   selectWaveformImages,
   setWaveformImages,
   selectTimelineZoom,
-  moveCut,
   selectDurationInSeconds,
+  selectSegments,
+  selectActiveSegmentIndex,
+  moveCut,
 } from "../redux/videoSlice";
 
 import { LuMenu } from "react-icons/lu";
@@ -36,6 +36,11 @@ import ScrollContainer from "react-indiana-drag-scroll";
 import CuttingActionsContextMenu from "./CuttingActionsContextMenu";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Spinner } from "@opencast/appkit";
+import {
+  selectSelectedSubtitleByIdForTimeline as chapterSelectSegments,
+  selectActiveSegmentIndex as chapterSelectActiveSegmentIndex,
+  moveCut as chapterMoveCut,
+} from "../redux/chapterSlice";
 
 /**
  * A container for visualizing the cutting of the video, as well as for controlling
@@ -51,6 +56,7 @@ const Timeline: React.FC<{
   setClickTriggered: ActionCreatorWithPayload<boolean, string>,
   setCurrentlyAt: ActionCreatorWithPayload<number, string>,
   setIsPlaying: ActionCreatorWithPayload<boolean, string>,
+  isChapters?: boolean,
 }> = ({
   timelineHeight = 200,
   styleByActiveSegment = true,
@@ -59,6 +65,7 @@ const Timeline: React.FC<{
   setClickTriggered,
   setCurrentlyAt,
   setIsPlaying,
+  isChapters = false,
 }) => {
 
   // Init redux variables
@@ -154,12 +161,29 @@ const Timeline: React.FC<{
             setIsPlaying={setIsPlaying}
           />
           <div css={{ position: "relative", height: timelineHeight + "px" }}>
-            <Waveforms timelineHeight={timelineHeight}/>
+            <Waveforms
+              timelineHeight={!isChapters ? timelineHeight : (timelineHeight / 4) * 3}
+              topOffset={!isChapters ? undefined : (timelineHeight / 4) * 1}
+            />
+            {isChapters &&
+              <SegmentsList
+                timelineWidth={width}
+                timelineHeight={(timelineHeight / 4) * 1}
+                styleByActiveSegment={styleByActiveSegment}
+                tabable={true}
+                selectSegments={chapterSelectSegments}
+                selectActiveSegmentIndex={chapterSelectActiveSegmentIndex}
+                moveCut={chapterMoveCut}
+              />
+            }
             <SegmentsList
               timelineWidth={width}
-              timelineHeight={timelineHeight}
-              styleByActiveSegment={styleByActiveSegment}
+              timelineHeight={!isChapters ? timelineHeight : (timelineHeight / 4) * 3}
+              styleByActiveSegment={!isChapters ? styleByActiveSegment : false}
               tabable={true}
+              selectSegments={selectSegments}
+              selectActiveSegmentIndex={selectActiveSegmentIndex}
+              moveCut={moveCut}
             />
           </div>
         </div>
@@ -201,6 +225,7 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   const [wasPlayingWhenGrabbed, setWasPlayingWhenGrabbed] = useState(false);
   const [keyboardJumpDelta, setKeyboardJumpDelta] = useState(1000);  // In milliseconds. For keyboard navigation
   const wasCurrentlyAtRef = useRef(0);
+  const activeSegment = segments[activeSegmentIndex];
 
   // Reposition scrubber when the current x position was changed externally
   useEffect(() => {
@@ -347,7 +372,7 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
             {
               currentTime: convertMsToReadableString(currentlyAt),
               segment: activeSegmentIndex,
-              segmentStatus: (segments[activeSegmentIndex].deleted ? "Deleted" : "Alive"),
+              segmentStatus: (activeSegment && activeSegment.deleted ? "Deleted" : "Alive"),
               moveLeft: rewriteKeys(KEYMAP.timeline.left.key),
               moveRight: rewriteKeys(KEYMAP.timeline.right.key),
               increase: rewriteKeys(KEYMAP.timeline.increase.key),
@@ -369,13 +394,18 @@ export const SegmentsList: React.FC<{
   timelineHeight: number,
   styleByActiveSegment?: boolean,
   tabable?: boolean,
+  selectSegments: (state: RootState) => Segment[],
+  selectActiveSegmentIndex: (state: RootState) => number,
+  moveCut: ActionCreatorWithPayload<{leftSegmentIndex: number, time: Segment["start"]}, string>,
 }> = ({
   timelineWidth,
   timelineHeight,
   styleByActiveSegment = true,
   tabable = true,
+  selectSegments,
+  selectActiveSegmentIndex,
+  moveCut,
 }) => {
-
   const { t } = useTranslation();
 
   // Init redux variables
@@ -433,7 +463,22 @@ export const SegmentsList: React.FC<{
                 width: ((segment.end - segment.start) / duration) * 100 + "%",
                 height: timelineHeight + "px",     // CHECK IF 100%
                 zIndex: 1,
+                // Center text
+                display: "flex",
+                alignItems: "center",
               }}>
+              {segment.text &&
+                  <span
+                    css={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      padding: "8px",
+                    }}
+                  >
+                    {segment.text}
+                  </span>
+              }
             </div>
           </ThemedTooltip>
           {index + 1 < segments.length &&    // Check if not rightmost section
@@ -441,6 +486,8 @@ export const SegmentsList: React.FC<{
               leftSegmentIndex={index}
               timelineWidth={timelineWidth}
               timelineHeight={timelineHeight}
+              selectSegments={selectSegments}
+              moveCut={moveCut}
             />
           }
         </React.Fragment>
@@ -451,8 +498,6 @@ export const SegmentsList: React.FC<{
   const segmentsStyle = css({
     display: "flex",
     flexDirection: "row",
-    // paddingTop: "10px",
-    height: "100%",
   });
 
   return (
@@ -466,10 +511,14 @@ export const CutMark: React.FC<{
   leftSegmentIndex: number,
   timelineWidth: number,
   timelineHeight: number,
+  selectSegments: (state: RootState) => Segment[],
+  moveCut: ActionCreatorWithPayload<{leftSegmentIndex: number, time: Segment["start"]}, string>,
 }> = ({
   leftSegmentIndex,
   timelineWidth,
   timelineHeight,
+  selectSegments,
+  moveCut,
 }) => {
 
   // Init redux variables
@@ -577,7 +626,7 @@ export const CutMark: React.FC<{
 /**
  * Generates waveform images and displays them
  */
-export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeight }) => {
+export const Waveforms: React.FC<{ timelineHeight: number; topOffset?: number }> = ({ timelineHeight, topOffset }) => {
 
   const { t } = useTranslation();
 
@@ -599,7 +648,7 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
     ...(images.length <= 0) && { alignItems: "center" },  // Only center during loading
     width: "100%",
     height: timelineHeight + "px",   // CHECK IF     height: "100%",
-    // paddingTop: "10px",
+    paddingTop: topOffset,
     filter: `${theme.invert_wave}`,
     color: `${theme.inverted_text}`,
   });

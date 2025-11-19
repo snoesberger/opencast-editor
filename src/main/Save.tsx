@@ -38,6 +38,8 @@ import { ErrorBox } from "@opencast/appkit";
 import { Spinner } from "@opencast/appkit";
 import { ProtoButton } from "@opencast/appkit";
 import { setEnd } from "../redux/endSlice";
+import { selectSubtitles as selectChapters } from "../redux/chapterSlice";
+import { SubtitlesInEditor } from "../types";
 
 /**
  * Shown if the user wishes to save.
@@ -127,6 +129,7 @@ export const SaveButton: React.FC<{
   const tracks = useAppSelector(selectTracks);
   const customizedTrackSelection = useAppSelector(selectCustomizedTrackSelection);
   const subtitles = useAppSelector(selectSubtitles);
+  const chapters = useAppSelector(selectChapters);
   const metadata = useAppSelector(selectCatalogs);
   const selectedWorkflowId = useAppSelector(selectSelectedWorkflowId);
   const workflowStatus = useAppSelector(selectStatus);
@@ -154,8 +157,8 @@ export const SaveButton: React.FC<{
     }
   };
 
-  const prepareSubtitles = () =>
-    Object.entries(subtitles).map(([id, { deleted, cues, tags }]) => ({
+  const prepareSubtitles = (subs: { [identifier: string]: SubtitlesInEditor; }) =>
+    Object.entries(subs).map(([id, { deleted, cues, tags }]) => ({
       id,
       subtitle: deleted ? "" : serializeSubtitle(cues),
       tags: deleted ? [] : tags,
@@ -167,7 +170,8 @@ export const SaveButton: React.FC<{
       segments: segments,
       tracks: tracks,
       customizedTrackSelection,
-      subtitles: prepareSubtitles(),
+      subtitles: prepareSubtitles(subtitles),
+      chapters: prepareSubtitles(chapters),
       metadata: metadata,
       workflow: startWorkflow && selectedWorkflowId ? [{ id: selectedWorkflowId }] : undefined,
     }));

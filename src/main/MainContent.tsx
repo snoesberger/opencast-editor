@@ -22,6 +22,7 @@ import { selectHasChanges as selectSubtitleHasChanges } from "../redux/subtitleS
 import { useTheme } from "../themes";
 import Thumbnail from "./Thumbnail";
 import Cutting from "./Cutting";
+import Chapter from "./Chapter";
 
 /**
  * A container for the main functionality
@@ -112,6 +113,12 @@ const MainContent: React.FC = () => {
       return (
         <div css={[mainContentStyle, subtitleSelectStyle]} role="main">
           <Subtitle />
+        </div>
+      );
+    } else if (mainMenuState === MainMenuStateNames.chapters) {
+      return (
+        <div css={[mainContentStyle, subtitleSelectStyle]} role="main">
+          <Chapter />
         </div>
       );
     } else if (mainMenuState === MainMenuStateNames.thumbnail) {

@@ -13,6 +13,30 @@ import {
   selectSelectedSubtitleId,
   setSubtitle,
   removeSubtitle,
+  selectFocusSegmentId,
+  selectFocusSegmentTriggered,
+  selectFocusSegmentTriggered2,
+  addCueAtIndex,
+  removeCue,
+  setCueAtIndex,
+  setCurrentlyAt,
+  setFocusSegmentTriggered,
+  setFocusSegmentTriggered2,
+  setFocusToSegmentAboveId,
+  setFocusToSegmentBelowId,
+  selectIsPlaying,
+  selectCurrentlyAt,
+  selectCurrentlyAtInSeconds,
+  selectClickTriggered,
+  selectPreviewTriggered,
+  selectAspectRatio,
+  selectIsPlayPreview,
+  setIsPlaying,
+  setPreviewTriggered,
+  setAspectRatio,
+  setIsPlayPreview,
+  setCurrentlyAtAndTriggerPreview,
+  setClickTriggered,
 } from "../redux/subtitleSlice";
 import SubtitleVideoArea from "./SubtitleVideoArea";
 import SubtitleTimeline from "./SubtitleTimeline";
@@ -149,8 +173,37 @@ const SubtitleEditor: React.FC = () => {
             </div>
           </div>
           <div css={subAreaStyle}>
-            <SubtitleListEditor />
-            <SubtitleVideoArea />
+            <SubtitleListEditor
+              selectSelectedSubtitleById={selectSelectedSubtitleById}
+              selectSelectedSubtitleId={selectSelectedSubtitleId}
+              selectFocusSegmentId={selectFocusSegmentId}
+              selectFocusSegmentTriggered={selectFocusSegmentTriggered}
+              selectFocusSegmentTriggered2={selectFocusSegmentTriggered2}
+              addCueAtIndex={addCueAtIndex}
+              removeCue={removeCue}
+              setCueAtIndex={setCueAtIndex}
+              setCurrentlyAt={setCurrentlyAt}
+              setFocusSegmentTriggered={setFocusSegmentTriggered}
+              setFocusSegmentTriggered2={setFocusSegmentTriggered2}
+              setFocusToSegmentAboveId={setFocusToSegmentAboveId}
+              setFocusToSegmentBelowId={setFocusToSegmentBelowId}
+            />
+            <SubtitleVideoArea
+              selectIsPlaying={selectIsPlaying}
+              selectCurrentlyAt={selectCurrentlyAt}
+              selectCurrentlyAtInSeconds={selectCurrentlyAtInSeconds}
+              selectClickTriggered={selectClickTriggered}
+              selectPreviewTriggered={selectPreviewTriggered}
+              selectAspectRatio={selectAspectRatio}
+              selectIsPlayPreview={selectIsPlayPreview}
+              selectSelectedSubtitleById={selectSelectedSubtitleById}
+              setIsPlaying={setIsPlaying}
+              setPreviewTriggered={setPreviewTriggered}
+              setAspectRatio={setAspectRatio}
+              setIsPlayPreview={setIsPlayPreview}
+              setClickTriggered={setClickTriggered}
+              setCurrentlyAtAndTriggerPreview={setCurrentlyAtAndTriggerPreview}
+            />
           </div>
           <SubtitleTimeline />
         </>

@@ -5,6 +5,7 @@ export interface Segment {
   start: number,
   end: number,
   deleted: boolean,
+  text?: string, // For chapters
 }
 
 export interface Track {
@@ -72,6 +73,7 @@ export interface PostEditArgument {
   tracks: Track[]
   customizedTrackSelection: boolean
   subtitles: SubtitlesFromOpencast[]
+  chapters: SubtitlesFromOpencast[]
   workflow?: [{id: string}]
   metadata: Catalog[]
 }
@@ -82,6 +84,7 @@ export enum MainMenuStateNames {
   metadata = "mainMenu.metadata-button",
   trackSelection = "mainMenu.select-tracks-button",
   subtitles = "mainMenu.subtitles-button",
+  chapters = "mainMenu.chapters-button",
   thumbnail = "mainMenu.thumbnail-button",
   finish = "mainMenu.finish-button",
   keyboardControls = "mainMenu.keyboard-controls-button",
