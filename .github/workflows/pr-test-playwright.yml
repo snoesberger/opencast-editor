@@ -1,4 +1,4 @@
-name: Playwright UI-Test
+name: Build » Playwright UI-Test
 
 on:
   push:
