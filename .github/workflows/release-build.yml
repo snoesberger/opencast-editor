@@ -123,7 +123,7 @@ jobs:
           echo "${{ secrets.MODULE_PR_TOKEN }}" > token.txt
           gh auth login --with-token < token.txt
           gh pr create \
-            --title "Update ${{ needs.build-release-tarballsoutputs.branch }} Editor to ${{ needs.build-release-tarballsoutputs.tag }}" \
+            --title "Update ${{ needs.build-release-tarballs.outputs.branch }} Editor to ${{ needs.build-release-tarballs.outputs.tag }}" \
             --body "Updating Opencast ${{ needs.build-release-tarballs.outputs.branch }} Editor module to [${{ needs.build-release-tarballs.outputs.tag }}](https://github.com/${{ github.repository_owner }}/opencast-editor/releases/tag/${{ needs.build-release-tarballs.outputs.tag }})" \
             --head=${{ github.repository_owner }}:t/editor-${{ needs.build-release-tarballs.outputs.tag }} \
             --base ${{ needs.build-release-tarballs.outputs.branch }} \
