@@ -1,0 +1,29 @@
+name: Build » Vitest tests
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+    branches:
+      - develop
+      - r/*
+
+jobs:
+  check-npm-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Get Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run npm ci
+        run: npm ci
+
+      - name: Execute Vitest tests
+        run: npm run test

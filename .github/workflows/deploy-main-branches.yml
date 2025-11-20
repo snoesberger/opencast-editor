@@ -1,4 +1,4 @@
-name: Build & Deploy main branches
+name: Build » Deploy main branches
 
 on:
   push:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  detect:
+  detect-repo-owner:
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
     outputs:
@@ -23,7 +23,7 @@ jobs:
 
       - name: Determine the correct test server
         id: test-server
-        run: echo "server=`./.github/get-release-server.sh ${{ github.ref_name }}`" >> $GITHUB_OUTPUT
+        run: echo "server=https://`./.github/get-release-server.sh ${{ github.ref_name }}`" >> $GITHUB_OUTPUT
 
       - name: Determine branch name
         id: branch-name
@@ -33,29 +33,29 @@ jobs:
           #Strip the r/ prefix, giving us just 17.x.  If this is main/develop this does nothing
           echo "branch=${TEMP#r\/}" >> $GITHUB_OUTPUT
 
-  main:
+  deploy-main-branches:
     runs-on: ubuntu-latest
-    needs: detect
+    needs: detect-repo-owner
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Get Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Clean install
+      - name: Run npm ci
         run: npm ci
 
-      - name: Build App
+      - name: Build the app
         run: |
           # This set the editor's datasource to the relevant test server
           sed -i "s#develop.opencast.org#$SERVER#g" public/editor-settings.toml
           npm run build
         env:
-          SERVER: ${{needs.detect.outputs.server}}
-          PUBLIC_URL: ${{needs.detect.outputs.branch}}
+          SERVER: ${{needs.detect-repo-owner.outputs.server}}
+          PUBLIC_URL: ${{needs.detect-repo-owner.outputs.branch}}
           VITE_APP_SETTINGS_PATH: editor-settings.toml
 
       # tests are currently failing
@@ -65,7 +65,7 @@ jobs:
 
       - name: Prepare git
         run: |
-          git config --global user.name "Release Bot"
+          git config --global user.name "Editor Deployment Bot"
           git config --global user.email "cloud@opencast.org"
 
       - name: Commit new version
@@ -86,7 +86,7 @@ jobs:
           git add $BRANCH index.html
           git diff --staged --quiet || git commit --amend -m "Build $(date)"
         env:
-          BRANCH: ${{needs.detect.outputs.branch}}
+          BRANCH: ${{needs.detect-repo-owner.outputs.branch}}
 
       - name: Push updates
         run: git push origin gh-pages --force
