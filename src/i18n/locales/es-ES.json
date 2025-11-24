@@ -4,6 +4,7 @@
         "finish-button": "Finalizar",
         "select-tracks-button": "Pistas",
         "subtitles-button": "Subtítulos",
+        "chapters-button": "Chapters",
         "thumbnail-button": "Miniatura",
         "metadata-button": "Metadatos",
         "keyboard-controls-button": "Controles del teclado",
@@ -13,12 +14,20 @@
         "cut-button": "Cortar",
         "cut-tooltip": "Dividir el segmento en la posición actual del marcador en la línea de tiempo. Acceso Rápido:: {{hotkeyName}}",
         "cut-tooltip-aria": "Cortar. Dividir el segmento en la posición actual del marcador en la línea de tiempo. Acceso Rápido: {{hotkeyName}}.",
+        "add-button": "Add",
+        "add-tooltip": "Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
+        "add-tooltip-aria": "Add. Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
         "delete-button": "Borrar",
         "delete-restore-tooltip": "Marcar o desmarcar el segmento en la posición actual para ser eliminado. Acceso Rápido: {{hotkeyName}}",
         "delete-restore-tooltip-aria": "Delete and Restore. Mark or unmark the segment at the current position as to be deleted. Hotkey: {{hotkeyName}}.",
+        "deleteByMerge-tooltip": "Remove the segment at the current position. Hotkey: {{hotkeyName}}",
+        "deleteByMerge-tooltip-aria": "Remove the segment at the current position. Hotkey: {{hotkeyName}}.",
         "merge-all-button": "Combinarlo todo",
         "merge-all-tooltip": "Combina todos los segmentos en un solo segmento.",
         "merge-all-tooltip-aria": "Combinarlo todo. Combina todos los segmentos en un solo segmento.",
+        "delete-all-button": "Delete All",
+        "delete-all-tooltip": "Remove all segments.",
+        "delete-all-tooltip-aria": "Delete All. Remove all segments.",
         "restore-button": "Restaurar",
         "mergeLeft-button": "Fusionar a la izquierda",
         "mergeLeft-tooltip": "Combina el segmento actualmente activo con el segmento a su izquierda. Acceso rápido: {{hotkeyName}}",
@@ -296,6 +305,9 @@
     },
     "subtitleTimeline": {
         "overviewTimelineTooltip": "Previsualización de la línea de tiempo"
+    },
+    "chapters": {
+        "editTitle": "Chapter Editor"
     },
     "keyboardControls": {
         "header": "Atajos",

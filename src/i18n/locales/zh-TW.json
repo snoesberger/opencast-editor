@@ -4,6 +4,7 @@
         "finish-button": "完成",
         "select-tracks-button": "影音軌道",
         "subtitles-button": "Subtitles",
+        "chapters-button": "Chapters",
         "thumbnail-button": "縮圖",
         "metadata-button": "後設資料",
         "keyboard-controls-button": "鍵盤控制",
@@ -13,12 +14,20 @@
         "cut-button": "裁剪",
         "cut-tooltip": "Split the segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
         "cut-tooltip-aria": "Cut. Split the segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
+        "add-button": "Add",
+        "add-tooltip": "Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
+        "add-tooltip-aria": "Add. Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
         "delete-button": "刪除",
         "delete-restore-tooltip": "在當前位置標記或取消標記要刪除的區段。 熱鍵：{{hotkeyName}}",
         "delete-restore-tooltip-aria": "Delete and Restore. Mark or unmark the segment at the current position as to be deleted. Hotkey: {{hotkeyName}}.",
+        "deleteByMerge-tooltip": "Remove the segment at the current position. Hotkey: {{hotkeyName}}",
+        "deleteByMerge-tooltip-aria": "Remove the segment at the current position. Hotkey: {{hotkeyName}}.",
         "merge-all-button": "Merge All",
         "merge-all-tooltip": "Combine all segments into a single segment.",
         "merge-all-tooltip-aria": "Merge All. Combine all segments into a single segment.",
+        "delete-all-button": "Delete All",
+        "delete-all-tooltip": "Remove all segments.",
+        "delete-all-tooltip-aria": "Delete All. Remove all segments.",
         "restore-button": "還原",
         "mergeLeft-button": "左合併",
         "mergeLeft-tooltip": "將當前活動區段與其左側的區段合併。 熱鍵：{{hotkeyName}}",
@@ -296,6 +305,9 @@
     },
     "subtitleTimeline": {
         "overviewTimelineTooltip": "Timeline overview"
+    },
+    "chapters": {
+        "editTitle": "Chapter Editor"
     },
     "keyboardControls": {
         "header": "Shortcuts",

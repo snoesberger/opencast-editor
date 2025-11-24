@@ -4,6 +4,7 @@
         "finish-button": "Fertigstellen",
         "select-tracks-button": "Spuren",
         "subtitles-button": "Untertitel",
+        "chapters-button": "Chapters",
         "thumbnail-button": "Vorschaubild",
         "metadata-button": "Metadaten",
         "keyboard-controls-button": "Tastatursteuerung",
@@ -13,12 +14,20 @@
         "cut-button": "Schneiden",
         "cut-tooltip": "Segment an der aktuellen Position der Zeitleiste teilen. Hotkey: {{hotkeyName}}",
         "cut-tooltip-aria": "Schneiden. Teilt das Segment an der aktuellen Position des Zeitmarkers. Hotkey: {{hotkeyName}}.",
+        "add-button": "Add",
+        "add-tooltip": "Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
+        "add-tooltip-aria": "Add. Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
         "delete-button": "Löschen",
         "delete-restore-tooltip": "Markieren oder entfernen Sie das Segment an der aktuellen Position zur Löschung. Hotkey: {{hotkeyName}}",
         "delete-restore-tooltip-aria": "Delete and Restore. Mark or unmark the segment at the current position as to be deleted. Hotkey: {{hotkeyName}}.",
+        "deleteByMerge-tooltip": "Remove the segment at the current position. Hotkey: {{hotkeyName}}",
+        "deleteByMerge-tooltip-aria": "Remove the segment at the current position. Hotkey: {{hotkeyName}}.",
         "merge-all-button": "Alle zusammenführen",
         "merge-all-tooltip": "Alle Segmente in ein einziges Segment zusammenführen.",
         "merge-all-tooltip-aria": "Alle Segmente in ein einziges Segment zusammenführen.",
+        "delete-all-button": "Delete All",
+        "delete-all-tooltip": "Remove all segments.",
+        "delete-all-tooltip-aria": "Delete All. Remove all segments.",
         "restore-button": "Wiederherstellen",
         "mergeLeft-button": "Links zusammenfügen",
         "mergeLeft-tooltip": "Verbinde das aktuell aktive Segment mit dem Segment auf der linken Seite. Hotkey: {{hotkeyName}}",
@@ -296,6 +305,9 @@
     },
     "subtitleTimeline": {
         "overviewTimelineTooltip": "Zeitleiste-Übersicht"
+    },
+    "chapters": {
+        "editTitle": "Chapter Editor"
     },
     "keyboardControls": {
         "header": "Tastenkürzel",
