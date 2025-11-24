@@ -1,4 +1,4 @@
-name: Publish Pull Request Page
+name: PRs » Publish Pull Request Page
 
 on:
   pull_request_target:
@@ -11,10 +11,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  detect:
-    needs: member
-    if: ${{ needs.member.outputs.is_team_member == 'true'
-      || github.event.pull_request.head.repo.full_name == 'opencast/opencast-editor' }}
+  detect-repo-owner:
+    if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
     outputs:
       server: ${{ steps.test-server.outputs.server }}
@@ -28,7 +26,7 @@ jobs:
 
       - name: Determine the correct test server
         id: test-server
-        run: echo "server=`./.github/get-release-server.sh ${{ github.ref_name }}`" >> $GITHUB_OUTPUT
+        run: echo "server=https://`./.github/get-release-server.sh ${{ github.ref_name }}`" >> $GITHUB_OUTPUT
 
       - name: Determine branch name
         id: branch-name
@@ -38,43 +36,43 @@ jobs:
           #Strip the r/ prefix, giving us just 17.x.  If this is main/develop this does nothing
           echo "branch=${TEMP#r\/}" >> $GITHUB_OUTPUT
 
-  main:
+  deploy-pr:
     runs-on: ubuntu-latest
-    needs: detect
+    needs: detect-repo-owner
     steps:
-      - name: generate build path
+      - name: Generate build path
         run: echo "build=${{github.event.number}}/$(date +%Y-%m-%d_%H-%M-%S)/" >> $GITHUB_OUTPUT
         id: build-path
 
-      - name: Checkout Sources
+      - name: Checkout sources
         uses: actions/checkout@v4
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
-      - name: Use Node.js
+      - name: Get Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Clean install
+      - name: Run npm ci
         run: npm ci
 
-      - name: Build App
+      - name: Build the app
         run: |
           # This set the editor's datasource to the relevant test server
           sed -i "s#develop.opencast.org#$SERVER#g" public/editor-settings.toml
           npm run build
         env:
-          SERVER: ${{needs.detect.outputs.server}}
+          SERVER: ${{needs.detect-repo-owner.outputs.server}}
           PUBLIC_URL: ${{ steps.build-path.outputs.build }}
 
-      - name: Prepare Git
+      - name: Prepare git
         run: |
-          git config --global user.name "Release Bot"
+          git config --global user.name "Editor Deployment Bot"
           git config --global user.email "cloud@opencast.org"
 
-      - name: Prepare GitHub SSH key
+      - name: Prepare GitHub SSH key from org level secret
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY_TEST }}
         run: |
@@ -94,7 +92,7 @@ jobs:
         run: |
           git clone -b gh-pages "git@github.com:${{ github.repository_owner }}/opencast-editor-test.git" editor-test
 
-      - name: Store build
+      - name: Store build in the clone
         env:
           DEPLOY_PATH: editor-test/${{ steps.build-path.outputs.build }}
         run: |
@@ -134,6 +132,7 @@ jobs:
       - name: Add comment with deployment location
         uses: thollander/actions-comment-pull-request@v3
         with:
+          comment-tag: static-test-deployment
           message: >
             This pull request is deployed at
             [test.editor.opencast.org/${{ steps.build-path.outputs.build }}
@@ -142,7 +141,10 @@ jobs:
             It might take a few minutes for it to become available.
 
 
-  member:
+  #This is currently defunct, but kept around in case we run into issues in the future
+  # where this check might be handy, cf spammers filing PRs or something.
+  # Previously we checked is_team_member prior to doing anything else above
+  check-member:
     name: Check organization membership
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
@@ -173,7 +175,7 @@ jobs:
           exit: false
 
 
-  translations:
+  check-no-modified-translations:
     name: Translations only via Crowdin
     if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
