@@ -273,13 +273,13 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   useHotkeys(
     KEYMAP.timeline.increase.key,
     () => setKeyboardJumpDelta(keyboardJumpDelta => Math.min(keyboardJumpDelta * 10, 1000000)),
-    {},
+    { preventDefault: true },
     [keyboardJumpDelta],
   );
   useHotkeys(
     KEYMAP.timeline.decrease.key,
     () => setKeyboardJumpDelta(keyboardJumpDelta => Math.max(keyboardJumpDelta / 10, 1)),
-    {},
+    { preventDefault: true },
     [keyboardJumpDelta],
   );
 

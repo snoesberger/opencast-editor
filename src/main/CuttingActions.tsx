@@ -95,13 +95,13 @@ const CuttingActions: React.FC = () => {
   useHotkeys(
     KEYMAP.cutting.zoomIn.key,
     () => dispatchAction(timelineZoomIn),
-    { preventDefault: true, combinationKey: KEYMAP.cutting.zoomIn.combinationKey },
+    { preventDefault: true, splitKey: KEYMAP.cutting.zoomIn.splitKey, useKey: true },
     [timelineZoomIn],
   );
   useHotkeys(
     KEYMAP.cutting.zoomOut.key,
-    () => dispatchAction(timelineZoomOut, undefined),
-    { preventDefault: true },
+    () => dispatchAction(timelineZoomOut),
+    { preventDefault: true, useKey: true },
     [timelineZoomOut],
   );
 

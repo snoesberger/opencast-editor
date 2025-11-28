@@ -292,7 +292,9 @@ const SubtitleListSegment = React.memo((props: subtitleListSegmentProps) => {
         deleteCue();
         break;
     }
-  }, { enableOnFormTags: ["input", "select", "textarea"] }, [identifier, cue, props.index]);
+  }, { enableOnFormTags: ["input", "select", "textarea"], preventDefault: true }, [identifier, cue, props.index]);
+
+  const hotkeyDivRef = hotkeyRef as React.RefObject<HTMLDivElement>;
 
   const setTimeToSegmentStart = () => {
     dispatch(setCurrentlyAt(cue.startTime));
@@ -369,7 +371,7 @@ const SubtitleListSegment = React.memo((props: subtitleListSegmentProps) => {
   });
 
   return (
-    <div ref={hotkeyRef} tabIndex={-1} css={[segmentStyle, {
+    <div ref={hotkeyDivRef} tabIndex={-1} css={[segmentStyle, {
       ...props.style,
       // Used for padding in the VariableSizeList
       top: props.style.top !== undefined ?
