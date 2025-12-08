@@ -213,6 +213,7 @@ const VideoSelectDropdown: React.FC<{
       <Select
         name={dropdownName}
         styles={selectFieldStyle(theme)}
+        isMulti={false}
         css={subtitleAddFormStyle}
         options={data}
         defaultValue={data.filter(({ value }) => value === stringifyFlavor(defaultFlavor))}

@@ -171,9 +171,7 @@ type MyOptionType = {
   value: string;
 };
 
-type IsMulti = false;
-
-export function selectFieldStyle(theme: Theme): StylesConfig<MyOptionType, IsMulti> {
+export function selectFieldStyle<IsMulti extends boolean, >(theme: Theme): StylesConfig<MyOptionType, IsMulti> {
   return {
     control: (provided, state) => ({
       ...provided,

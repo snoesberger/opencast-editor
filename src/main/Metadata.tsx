@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { css } from "@emotion/react";
 import { BREAKPOINTS, calendarStyle, selectFieldStyle, titleStyle, titleStyleBold } from "../cssStyles";
@@ -6,16 +6,15 @@ import { BREAKPOINTS, calendarStyle, selectFieldStyle, titleStyle, titleStyleBol
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
   fetchMetadata,
-  selectCatalogs,
-  Catalog,
   MetadataField,
   setFieldValue,
-  selectGetError,
   selectGetStatus,
-  setFieldReadonly,
+  selectCatalogIds,
+  selectCatalogById,
+  selectFieldById,
+  selectGetError,
 } from "../redux/metadataSlice";
 
-import { Form, Field, FieldInputProps } from "react-final-form";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 
@@ -25,72 +24,35 @@ import { DateTime as LuxonDateTime } from "luxon";
 import { configureFieldsAttributes, settings } from "../config";
 import { useTheme } from "../themes";
 import { ThemeProvider } from "@mui/material/styles";
-import { cloneDeep } from "lodash";
 import { ParseKeys } from "i18next";
 import { ErrorBox } from "@opencast/appkit";
 import { screenWidthAtMost } from "@opencast/appkit";
+import { debounce } from "lodash";
 
 /**
- * Creates a Metadata form
- *
- * Takes data from a redux slice and throws it into a react-final-form.
- * When submitting, the state in the redux slice gets updated
- *
- * If something doesn"t work, main places of interest are the submit function
- * and the initialValues function
+ * The root component for Metadata
  */
 const Metadata: React.FC = () => {
-
-  const { t, i18n } = useTranslation();
-
-  // Init redux variables
   const dispatch = useAppDispatch();
-  const catalogs = useAppSelector(selectCatalogs);
   const getStatus = useAppSelector(selectGetStatus);
-  const getError = useAppSelector(selectGetError);
-  const theme = useTheme();
 
-  // Try to fetch URL from external API
   useEffect(() => {
     if (getStatus === "idle") {
       dispatch(fetchMetadata());
     }
   }, [getStatus, dispatch]);
 
-  // Overwrite readonly property of fields based on config settings
-  useEffect(() => {
-    if (getStatus === "success") {
-      for (let catalogIndex = 0; catalogIndex < catalogs.length; catalogIndex++) {
-        if (settings.metadata.configureFields) {
-          const configureFields = settings.metadata.configureFields;
-          const catalog = catalogs[catalogIndex];
+  return (<Catalogs />);
+};
 
-          if (catalog.title in configureFields) {
-            if (Object.keys(configureFields[catalog.title]).length > 0) {
-              const configureFieldsCatalog = configureFields[catalog.title];
-
-              for (let fieldIndex = 0; fieldIndex < catalog.fields.length; fieldIndex++) {
-                if (catalog.fields[fieldIndex].id in configureFieldsCatalog) {
-                  if ("readonly" in configureFieldsCatalog[catalog.fields[fieldIndex].id]) {
-                    dispatch(setFieldReadonly({
-                      catalogIndex: catalogIndex, fieldIndex: fieldIndex,
-                      value: configureFieldsCatalog[catalog.fields[fieldIndex].id].readonly,
-                    }));
-                  }
-                }
-              }
-            } else {
-              return undefined;
-            }
-          }
-        }
-      }
-    }
-  }, [getStatus, catalogs, dispatch]);
-
-  /**
-   * CSS
-   */
+/**
+ * Create catalog components or display error message
+ */
+const Catalogs: React.FC = () => {
+  const { t } = useTranslation();
+  const catalogIds = useAppSelector(selectCatalogIds);   // array of IDs (strings)
+  const getStatus = useAppSelector(selectGetStatus);
+  const getError = useAppSelector(selectGetError);
 
   const metadataStyle = css({
     padding: "20px",
@@ -106,6 +68,44 @@ const Metadata: React.FC = () => {
     },
   });
 
+  return (
+    <div css={metadataStyle}>
+      {getStatus === "failed" &&
+        <ErrorBox>
+          <span css={{ whiteSpace: "pre-line" }}>
+            {"A problem occurred during communication with Opencast. \n"}
+            {getError ?
+              t("various.error-details-text", { errorMessage: getError }) : undefined
+            }
+          </span>
+        </ErrorBox>
+      }
+
+      {catalogIds.map(id => (
+        <Catalog key={id} id={id} />
+      ))}
+    </div>
+  );
+};
+
+interface Props { id: string }
+/**
+ * A catalog created field components
+ */
+const Catalog: React.FC<Props> = ({ id }) => {
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
+
+  const catalog = useAppSelector(state => selectCatalogById(state, id));
+  if (!catalog) { return null; }
+
+  // eslint-disable-next-line max-len
+  const catalogConfig = settings.metadata.configureFields ? settings.metadata.configureFields[catalog.title] : undefined;
+  // If there are no fields for a given catalog, do not render
+  if (catalogConfig && Object.keys(catalogConfig).length <= 0) {
+    return null;
+  }
+
   const catalogStyle = css({
     background: `${theme.menu_background}`,
     borderRadius: "5px",
@@ -114,6 +114,47 @@ const Metadata: React.FC = () => {
     boxSizing: "border-box",
     padding: "10px",
   });
+
+  return (
+    <section css={catalogStyle}>
+      <div css={[titleStyle(theme), titleStyleBold(theme)]}>
+        {i18n.exists(`metadata.${catalog.title.replaceAll(".", "-")}`) ?
+          t(`metadata.${catalog.title.replaceAll(".", "-")}` as ParseKeys) : catalog.title
+        }
+      </div>
+      {catalog.fieldIds.map(fid => {
+        return <Field key={fid} id={fid} catalogConfig={catalogConfig}/>;
+      })}
+    </section>
+  );
+};
+
+
+interface FieldProps {
+  id: string,
+  catalogConfig: { [key: string]: configureFieldsAttributes } | undefined
+}
+/**
+ * A field has a label, content and validation
+ */
+const Field: React.FC<FieldProps> = ({ id, catalogConfig }) => {
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
+
+  const field = useAppSelector(state => selectFieldById(state, id));
+  if (!field) { return null; }
+
+  // If configured to not display this field, don't display this field
+  if (catalogConfig && field.name in catalogConfig && "show" in catalogConfig[field.name]) {
+    if (!catalogConfig[field.name].show) {
+      return null;
+    }
+  }
+
+  let readonly: boolean | undefined = undefined;
+  if (catalogConfig && field.name in catalogConfig && "readonly" in catalogConfig[field.name]) {
+    readonly = catalogConfig[field.name].readonly;
+  }
 
   const fieldStyle = css({
     display: "flex",
@@ -136,6 +177,158 @@ const Metadata: React.FC = () => {
     color: `${theme.metadata_highlight}`,
   });
 
+  return (
+    <div css={fieldStyle} data-testid={field.name}>
+      <label css={fieldLabelStyle}>
+        <>{
+          i18n.exists(`metadata.labels.${field.name}`) ?
+            t(`metadata.labels.${field.name}` as ParseKeys) : field.name
+        }</>
+        {field.required &&
+          <span css={fieldLabelRequiredStyle}>
+            {t("metadata.required")}
+          </span>
+        }
+      </label>
+
+      <FieldContent field={field} readonly={readonly} />
+      <FieldValidation field={field} />
+    </div>
+  );
+};
+
+/**
+ * Different input interfaces for fields
+ */
+const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ field, readonly }) => {
+  const { t, i18n } = useTranslation();
+  const dispatch = useAppDispatch();
+  const theme = useTheme();
+
+  const [localValue, setLocalValue] = useState(field.value ?? "");
+  const isMulti = Array.isArray(field.value);
+  if (readonly === undefined) {
+    readonly = field.readOnly;
+  }
+
+  useEffect(() => {
+    // <input type="datetime-local"> is picky about its value and won"t accept
+    // global datetime strings, so we have to convert them to local ourselves.
+    if ((field.type === "date" || field.type === "time") && field.value !== "") {
+      // field = cloneDeep(field);
+      const leDate = new Date(field.value);
+      leDate.setMinutes(leDate.getMinutes() - leDate.getTimezoneOffset());
+      // field.value = leDate.toISOString().slice(0, 16);
+      setLocalValue(leDate.toISOString().slice(0, 16));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Transforms field values and labels into an array of objects
+   * that can be parsed by react-select
+   * @param field
+   */
+  const generateReactSelectLibrary = (field: MetadataField) => {
+    if (field.collection) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const library: { value: any, label: string }[] = [];
+      Object.entries(field.collection).forEach(([key, value]) => {
+        // Parse Label
+        let descLabel = null;
+        if (i18n.exists(`metadata.${field.name}`)) {
+          descLabel = t(`metadata.${field.name}.${key.replaceAll(".", "-")}` as ParseKeys);
+
+          if (field.name === "license") {
+            descLabel = t(`metadata.${field.name}.${JSON.parse(key).label.replaceAll(".", "-")}` as ParseKeys);
+          }
+        }
+
+        // Change label for series
+        if (field.name === "isPartOf") {
+          descLabel = key;
+        }
+
+        // Add to library
+        library.push({
+          value: value,
+          label: descLabel ? descLabel : value,
+        });
+      });
+      library.sort((a, b) => a.label.localeCompare(b.label));
+      library.unshift({ value: "", label: "No value" });
+      return library;
+    } else {
+      return [];
+    }
+  };
+
+  const selectOptions = field.collection
+    ? generateReactSelectLibrary(field)
+    : [];
+
+
+  const currentSelectValue = isMulti
+    ? selectOptions.filter(opt => (localValue as unknown as string[]).includes(opt.value))
+    : selectOptions.find(opt => opt.value === localValue);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setLocalValue(e.target.value);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSelectChange = (selected: any) => {
+    if (isMulti) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setLocalValue(selected?.map((s: any) => s.value) ?? []);
+    } else {
+      setLocalValue(selected?.value ?? "");
+    }
+  };
+
+  const handleDateConversion = useCallback((value: string) => {
+    let returnValue = value;
+    if (field && (field.type === "date" || field.type === "time")) {
+      if (returnValue !== "") { // Empty string is allowed
+        returnValue = new Date(returnValue).toJSON();
+      }
+    }
+    return returnValue;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field?.type]);
+
+  // Set value in store, but debounced
+  const debouncedCommit = useMemo(
+    () =>
+      debounce((newValue: string) => {
+        newValue = handleDateConversion(newValue);
+        if (newValue !== field.value) {
+          dispatch(
+            setFieldValue({
+              id: field.id,
+              value: newValue,
+            }),
+          );
+        }
+      }, 500),
+    [dispatch, field.id, field.value, handleDateConversion],
+  );
+
+  useEffect(() => {
+    debouncedCommit(localValue);
+    return () => {
+      debouncedCommit.cancel();
+    };
+  }, [localValue, debouncedCommit]);
+
+  // Trigger debounce NOW (for onBlur)
+  const commitImmediately = () => {
+    debouncedCommit.flush();
+  };
+
+  /**
+   * CSS
+   */
   const fieldTypeStyle = (isReadOnly: boolean) => {
     return css({
       fontSize: "1em",
@@ -165,120 +358,116 @@ const Metadata: React.FC = () => {
     );
   };
 
-  const validateStyle = (isError: boolean) => {
-    return css({
-      lineHeight: "32px",
-      marginLeft: "10px",
-      ...(isError && { color: `${theme.error}` }),
-      fontWeight: "bold",
-    });
-  };
-
-  // const buttonContainerStyle = css({
-  //   display: "flex",
-  //   flexFlow: "row nowrap",
-  //   justifyContent: "space-around",
-  //   marginTop: "25px",
-  // })
-
-  // // TODO: Rework all div buttons so the ":enabled" pseudo-class does not screw them over
-  // const basicButtonStyleCOPY = css({
-  //   borderRadius: "10px",
-  //   cursor: "pointer",
-  //   // Animation
-  //   transitionDuration: "0.3s",
-  //   transitionProperty: "transform",
-  //   "&:hover:enabled": {
-  //     transform: "scale(1.1)",
-  //   },
-  //   "&:focus:enabled": {
-  //     transform: "scale(1.1)",
-  //   },
-  //   "&:active:enabled": {
-  //     transform: "scale(0.9)",
-  //   },
-  //   // Flex position child elements
-  //   display: "flex",
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   gap: "10px",
-  //   textAlign: "center" as const,
-  // });
-
-  // const submitButtonStyle = css({
-  //   background: "snow",
-  //   border: "1px solid #ccc",
-
-  //   "&[disabled]": {
-  //     opacity: "0.6",
-  //     cursor: "not-allowed",
-  //   },
-  // })
-
   /**
-   * Form Callbacks - Other
+   * Render
    */
-
-  /**
-    * Recursively recreates nested array structures for form initalValues
-    * @param library
-    * @param input
-    * @param output
-    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const helperHandleArrays = (library: any[] | null, input: string, output: any[]) => {
-    // If the value is hid inside an array, we need to extract it
-    if (Array.isArray(input)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      input.forEach((subArray: any) => {
-        output.push(helperHandleArrays(library, subArray, output));
-      });
+  // input.id = input.name;
+  if (field.collection) {
+    if (Array.isArray(field.value)) {
+      return (
+        <CreatableSelect
+          onChange={handleSelectChange}
+          onBlur={commitImmediately}
+          value={currentSelectValue}
+          isMulti
+          isClearable={!readonly}     // The component does not support readOnly, so we have to work around
+          isSearchable={!readonly}    // by setting other settings
+          openMenuOnClick={!readonly}
+          menuIsOpen={readonly ? false : undefined}
+          options={generateReactSelectLibrary(field)}
+          styles={selectFieldStyle(theme)}
+          name={field.name}
+          css={fieldTypeStyle(readonly)}>
+        </CreatableSelect>
+      );
+    } else {
+      return (
+        <Select
+          onChange={handleSelectChange}
+          onBlur={commitImmediately}
+          value={currentSelectValue}
+          isClearable={!readonly}     // The component does not support readOnly, so we have to work around
+          isSearchable={!readonly}    // by setting other settings
+          openMenuOnClick={!readonly}
+          menuIsOpen={readonly ? false : undefined}
+          options={generateReactSelectLibrary(field)}
+          styles={selectFieldStyle(theme)}
+          name={field.name}
+          css={fieldTypeStyle(readonly)}>
+        </Select>
+      );
     }
 
-    // Find react-select equivalent for inital value
-    return library?.find(el => el.submitValue === input);
-  };
+  } else if (field.type === "date") {
+    return (
+      <ThemeProvider theme={calendarStyle(theme)}>
+        <input
+          onChange={handleTextChange}
+          onBlur={commitImmediately}
+          value={localValue}
+          readOnly={readonly}
+          type="datetime-local"
+          name={field.name}
+          // inputFormat="yyyy/MM/dd HH:mm"
+          css={[fieldTypeStyle(readonly), inputFieldTypeStyle(readonly),
+            {
+              resize: "none",
+            },
+          ]}
+          data-testid="dateTimePicker"
+        />
+      </ThemeProvider>
+    );
+  } else if (field.type === "time") {
+    return (
+      <ThemeProvider theme={calendarStyle(theme)}>
+        <input
+          onChange={handleTextChange}
+          onBlur={commitImmediately}
+          value={localValue}
+          readOnly={readonly}
+          type="time"
+          name={field.name}
+          // inputFormat="HH:mm"
+          css={[fieldTypeStyle(readonly), inputFieldTypeStyle(readonly),
+            {
+              resize: "none",
+            },
+          ]}
+        />
+      </ThemeProvider>
+    );
+  } else if (field.type === "text_long") {
+    return (
+      <textarea
+        onChange={handleTextChange}
+        onBlur={commitImmediately}
+        value={localValue}
+        readOnly={readonly}
+        name={field.name}
+        css={[fieldTypeStyle(readonly), inputFieldTypeStyle(readonly)]}
+      />
+    );
+  } else {
+    return (
+      <input
+        onChange={handleTextChange}
+        onBlur={commitImmediately}
+        value={localValue}
+        readOnly={readonly}
+        name={field.name}
+        css={[fieldTypeStyle(readonly), inputFieldTypeStyle(readonly)]}
+      />
+    );
+  }
+};
 
-  /**
-   * Returns a data structure to initialize the form fields with
-   * @param catalogs
-   */
-  const getInitialValues = (catalogs: Catalog[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const initValues: { [n: string]: any; } = {};
-
-    catalogs.forEach((catalog: Catalog, catalogIndex: number) => {
-      initValues["catalog" + catalogIndex] = {};
-      catalog.fields.forEach((field: MetadataField) => {
-        initValues["catalog" + catalogIndex][field.id] = field.value;
-
-        // Handle initial values for select fields differently
-        // Since react-select creates different values
-        if (field.collection) {
-          const library = generateReactSelectLibrary(field);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let searchValue: any = field.value;
-
-          if (Array.isArray(searchValue)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const result: any[] = [];
-            helperHandleArrays(library, field.value, result);
-            searchValue = result;
-          } else {
-            searchValue = library?.find(el => el.submitValue === searchValue);
-          }
-
-          initValues["catalog" + catalogIndex][field.id] = searchValue;
-        }
-      });
-    });
-
-    return initValues;
-  };
-
-  /**
-   * Form Callbacks - Validation
-   */
+/**
+ * Check field values and render warning messages
+ */
+const FieldValidation: React.FC<{ field: MetadataField }> = ({ field }) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
 
   /**
    * Validator for required fields
@@ -331,453 +520,36 @@ const Metadata: React.FC = () => {
     return t("metadata.validation.datetime");
   };
 
-  // // Function that combines multiple validation functions. Needs to be made typescript conform
-  // @ts-expect-error: This is copy-pasted from the non-typescript documentation of react-final-form
-  const composeValidators = (...validators) => value =>
-    validators.reduce((error, validator) => error || validator(value), undefined);
-
   /**
-   * Returns the desired combination of validators for a given field
+   * Returns messages in case something did not validate
    * @param field
    */
-  const getValidators = (field: MetadataField) => {
-    const validators = [];
+  const validate = (field: MetadataField) => {
+    const validations = [];
     if (field.required) {
-      validators.push(required);
+      validations.push(required(field.value));
     }
     if (field.id === "duration") {
-      validators.push(duration);
+      validations.push(duration(field.value));
     }
     if (field.type === "date" || field.type === "time") {
-      validators.push(dateTimeValidator);
+      validations.push(dateTimeValidator(field.value));
     }
 
-    return composeValidators(...validators);
+    return validations;
   };
 
-  /**
-   * Form Callbacks - Submitting
-   */
-
-  /**
-    * Sends a single value to the corresponding field in redux.
-    * This kinda breaks the form workflow, since we do not use the submit callback
-    * of the form class anymore.
-    * @param value value for the field
-    * @param fieldId String of the form "catalog{catalogIndex}.name"
-    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const submitSingleField = (value: any, fieldId: string) => {
-    const catalogIndexString = fieldId.substring(
-      fieldId.indexOf("g") + 1,
-      fieldId.indexOf("."),
-    );
-    const fieldName = fieldId.substring(
-      fieldId.indexOf(".") + 1,
-      fieldId.length,
-    );
-    const catalogIndex = parseInt(catalogIndexString);
-
-    // Find the corresponding field index in the redux catalog
-    for (let fieldIndex = 0; fieldIndex < catalogs[catalogIndex].fields.length; fieldIndex++) {
-      if (catalogs[catalogIndex].fields[fieldIndex].id === fieldName) {
-        // Update the field in the redux catalog
-        dispatch(setFieldValue({
-          catalogIndex: catalogIndex, fieldIndex: fieldIndex,
-          value: parseValue(catalogs[catalogIndex].fields[fieldIndex], value),
-        }));
-        break;
-      }
-    }
-  };
-
-  /**
-   * Executes given blur callback while also sending the value of the current field to redux
-   * @param e
-   * @param input
-   */
-  const blurWithSubmit = (
-    e: React.FocusEvent<HTMLInputElement, Element> | React.FocusEvent<HTMLTextAreaElement, Element>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    input: any,
-  ) => {
-    input.onBlur(e);
-    submitSingleField(input.value, input.name);
-  };
-
-  /**
-   * Helper function for onSubmit
-   * Corrects formatting for certain form values
-   * @param field
-   * @param value
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parseValue = (field: MetadataField | null, value: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let returnValue: any = value;
-
-    // Parse values out react-multi-select and put them in an array
-    if (Array.isArray(value)) {
-      returnValue = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      value.forEach((subValue: any) => {
-        returnValue.push(parseValue(null, subValue));  // Pass field as null to avoid each value into an array later on
-      });
-    }
-
-    // If the value is hidden an object due to react-select, extract it
-    if (typeof value === "object" && value !== null && Object.prototype.hasOwnProperty.call(value, "submitValue")) {
-      returnValue = value.submitValue;
-    } else if (typeof value === "object" && value !== null && value.__isNew__) {
-      returnValue = value.value;
-    }
-
-    // For these fields, the value needs to be inside an array
-    if (field && !Array.isArray(value) && (field.type === "mixed_text")) {
-      if (value) {
-        returnValue = [returnValue];
-      } else {
-        returnValue = [];
-      }
-    }
-
-    // For these fields, the value needs to be inside an array
-    if (field && (field.type === "date" || field.type === "time") &&
-      Object.prototype.toString.call(returnValue) === "[object Date]") {
-      // If invalid date
-      if ((isNaN(returnValue.getTime()))) {
-        // Do nothing
-      } else {
-        returnValue = returnValue.toJSON();
-      }
-    } else if (field && (field.type === "date" || field.type === "time") && typeof returnValue === "string") {
-      if (returnValue !== "") { // Empty string is allowed
-        returnValue = new Date(returnValue).toJSON();
-      }
-    }
-
-    return returnValue;
-  };
-
-  /**
-   * Callback for when the form is submitted
-   * Saves values in redux state
-   * @param values
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = (values: { [x: string]: { [x: string]: any; }; }) => {
-    // For each submitted value, get the catalog it belongs to
-    Object.keys(values).forEach((formCatalogName: string) => {
-      const catalogIndex = parseInt(formCatalogName.replace("catalog", ""));
-
-      // For each field in the submitted values
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Object.keys(values[formCatalogName]).forEach((formFieldName: any) => {
-        // Find the corresponding field index in the redux catalog
-        for (let fieldIndex = 0; fieldIndex < catalogs[catalogIndex].fields.length; fieldIndex++) {
-          if (catalogs[catalogIndex].fields[fieldIndex].id === formFieldName) {
-            // Update the field in the redux catalog
-            dispatch(setFieldValue({
-              catalogIndex: catalogIndex, fieldIndex: fieldIndex,
-              value: parseValue(catalogs[catalogIndex].fields[fieldIndex], values[formCatalogName][formFieldName]),
-            }));
-            break;
-          }
-        }
-      });
-
+  const validateStyle = (isError: boolean) => {
+    return css({
+      lineHeight: "32px",
+      marginLeft: "10px",
+      ...(isError && { color: `${theme.error}` }),
+      fontWeight: "bold",
     });
   };
 
-  /**
-   * Form - Rendering
-   */
-
-  /**
-   * Transforms field values and labels into an array of objects
-   * that can be parsed by react-select
-   * @param field
-   */
-  const generateReactSelectLibrary = (field: MetadataField) => {
-    if (field.collection) {
-      // For whatever reason react-select uses "value" as their key, which is not at all confusing
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const library: { value: any, label: string, submitValue: any; }[] = [];
-      Object.entries(field.collection).forEach(([key, value]) => {
-        // Parse Label
-        let descLabel = null;
-        if (i18n.exists(`metadata.${field.id}`)) {
-          descLabel = t(`metadata.${field.id}.${key.replaceAll(".", "-")}` as ParseKeys);
-
-          if (field.id === "license") {
-            descLabel = t(`metadata.${field.id}.${JSON.parse(key).label.replaceAll(".", "-")}` as ParseKeys);
-          }
-        }
-
-        // Change label for series
-        if (field.id === "isPartOf") {
-          descLabel = key;
-        }
-
-        // Add to library
-        library.push({
-          value: key,
-          label: descLabel ? descLabel : value,
-          submitValue: value,
-        });
-      });
-      library.sort((a, b) => a.label.localeCompare(b.label));
-      library.unshift({ value: "", label: "No value", submitValue: "" });
-      return library;
-    } else {
-      return null;
-    }
-  };
-
-  /**
-   * Generates different form components based on the field
-   * @param field
-   * @param input
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const generateComponent = (field: MetadataField, input: any) => {
-    input.id = input.name;
-    if (field.collection) {
-      if (Array.isArray(field.value)) {
-        return (
-          <CreatableSelect {...input}
-            onBlur={e => { blurWithSubmit(e, input); }}
-            isMulti
-            isClearable={!field.readOnly}     // The component does not support readOnly, so we have to work around
-            isSearchable={!field.readOnly}    // by setting other settings
-            openMenuOnClick={!field.readOnly}
-            menuIsOpen={field.readOnly ? false : undefined}
-            options={generateReactSelectLibrary(field)}
-            styles={selectFieldStyle(theme)}
-            css={fieldTypeStyle(field.readOnly)}>
-          </CreatableSelect>
-        );
-      } else {
-        return (
-          <Select {...input}
-            onBlur={e => { blurWithSubmit(e, input); }}
-            isClearable={!field.readOnly}     // The component does not support readOnly, so we have to work around
-            isSearchable={!field.readOnly}    // by setting other settings
-            openMenuOnClick={!field.readOnly}
-            menuIsOpen={field.readOnly ? false : undefined}
-            options={generateReactSelectLibrary(field)}
-            styles={selectFieldStyle(theme)}
-            css={fieldTypeStyle(field.readOnly)}>
-          </Select>
-        );
-      }
-
-    } else if (field.type === "date") {
-      return (
-        <ThemeProvider theme={calendarStyle(theme)}>
-          <input {...input}
-            type="datetime-local"
-            name={field.id}
-            // inputFormat="yyyy/MM/dd HH:mm"
-            onBlur={e => { blurWithSubmit(e, input); }}
-            readOnly={field.readOnly}
-            css={[fieldTypeStyle(field.readOnly), inputFieldTypeStyle(field.readOnly),
-              {
-                resize: "none",
-              },
-            ]}
-            data-testid="dateTimePicker"
-          />
-        </ThemeProvider>
-      );
-    } else if (field.type === "time") {
-      return (
-        <ThemeProvider theme={calendarStyle(theme)}>
-          <input {...input}
-            type="time"
-            name={field.id}
-            // inputFormat="HH:mm"
-            onBlur={e => { blurWithSubmit(e, input); }}
-            readOnly={field.readOnly}
-            css={[fieldTypeStyle(field.readOnly), inputFieldTypeStyle(field.readOnly),
-              {
-                resize: "none",
-              },
-            ]}
-          />
-        </ThemeProvider>
-      );
-    } else if (field.type === "text_long") {
-      return (
-        <textarea {...input}
-          onBlur={e => { blurWithSubmit(e, input); }}
-          readOnly={field.readOnly}
-          css={[fieldTypeStyle(field.readOnly), inputFieldTypeStyle(field.readOnly)]}
-        />
-      );
-    } else {
-      return (
-        <input {...input}
-          onBlur={e => { blurWithSubmit(e, input); }}
-          readOnly={field.readOnly}
-          css={[fieldTypeStyle(field.readOnly), inputFieldTypeStyle(field.readOnly)]}
-        />
-      );
-    }
-  };
-
-  /**
-   * Renders a field in a catalog
-   * @param field
-   * @param catalogIndex
-   * @param fieldIndex
-   */
-  const renderField = (field: MetadataField, catalogIndex: number, fieldIndex: number) => {
-
-    /**
-     * Wrapper function for component generation.
-     * Handles the special case of DateTimePicker/TimePicker, which
-     * can"t handle empty string as a value (which is what Opencast uses to
-     * represent no date/time)
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const generateComponentWithModifiedInput = (field: MetadataField, input: FieldInputProps<any, HTMLElement>) => {
-      if ((field.type === "date" || field.type === "time") && input.value === "") {
-        const { value, ...other } = input;
-        return generateComponent(field, other);
-      }
-      // <input type="datetime-local"> is picky about its value and won"t accept
-      // global datetime strings, so we have to convert them to local ourselves.
-      // TODO: Also we really should not be modifying the input element like that
-      // so ideally the conversion happens somewhere else in the code
-      // (see error in the console for further details)
-      if ((field.type === "date" || field.type === "time")) {
-        input = cloneDeep(input);
-        const leDate = new Date(input.value);
-        leDate.setMinutes(leDate.getMinutes() - leDate.getTimezoneOffset());
-        input.value = leDate.toISOString().slice(0, 16);
-        return generateComponent(field, input);
-      } else {
-        return generateComponent(field, input);
-      }
-    };
-
-    return (
-      <Field key={fieldIndex}
-        name={"catalog" + catalogIndex + "." + field.id}
-        validate={getValidators(field)}
-        // react-final-form complains if we don"t specify checkboxes here
-        type={field.type === "boolean" ? "checkbox" : undefined}
-      >
-        {({ input, meta }) => (
-          <div css={fieldStyle} data-testid={field.id}>
-            <label css={fieldLabelStyle} htmlFor={input.name}>
-              <>{
-                i18n.exists(`metadata.labels.${field.id}`) ?
-                  t(`metadata.labels.${field.id}` as ParseKeys) : field.id
-              }</>
-              {field.required &&
-                <span css={fieldLabelRequiredStyle}>
-                  {t("metadata.required")}
-                </span>
-              }
-            </label>
-
-            {generateComponentWithModifiedInput(field, input)}
-            {meta.error && <span css={validateStyle(true)}>{meta.error}</span>}
-          </div>
-        )}
-      </Field>
-    );
-  };
-
-  const renderCatalog = (
-    catalog: Catalog,
-    catalogIndex: number,
-    configureFields: { [key: string]: configureFieldsAttributes; },
-  ) => {
-
-
-    return (
-      <div key={catalogIndex} css={catalogStyle}>
-        <div css={[titleStyle(theme), titleStyleBold(theme)]}>
-          {i18n.exists(`metadata.${catalog.title.replaceAll(".", "-")}`) ?
-            t(`metadata.${catalog.title.replaceAll(".", "-")}` as ParseKeys) : catalog.title
-          }
-        </div>
-
-        {catalog.fields.map((field, i) => {
-          // Render fields based on given array (usually parsed from config settings)
-          if (field.id in configureFields && "show" in configureFields[field.id]) {
-            if (configureFields[field.id].show) {
-              return renderField(field, catalogIndex, i);
-            } else {
-              return undefined;
-            }
-          }
-          return renderField(field, catalogIndex, i);
-        })}
-
-      </div>
-    );
-  };
-
-  /**
-   * Main render function. Renders all catalogs in a single form
-   */
-  const render = () => {
-    return (
-      <Form
-        onSubmit={onSubmit}
-        subscription={{ submitting: true, pristine: true }} // Hopefully causes less rerenders
-        initialValues={getInitialValues(catalogs)}
-        render={({ handleSubmit, form }) => (
-          <form onSubmit={event => {
-            handleSubmit(event);
-            // Ugly fix for form not getting updated after submit. TODO: Find a better fix
-            form.reset();
-          }} css={metadataStyle}>
-
-            {getStatus === "failed" &&
-              <ErrorBox>
-                <span css={{ whiteSpace: "pre-line" }}>
-                  {"A problem occurred during communication with Opencast. \n"}
-                  {getError ?
-                    t("various.error-details-text", { errorMessage: getError }) : undefined
-                  }
-                </span>
-              </ErrorBox>
-            }
-
-            {catalogs.map((catalog, i) => {
-              if (settings.metadata.configureFields) {
-                if (catalog.title in settings.metadata.configureFields) {
-                  // If there are no fields for a given catalog, do not render
-                  if (Object.keys(settings.metadata.configureFields[catalog.title]).length > 0) {
-                    return renderCatalog(catalog, i, settings.metadata.configureFields[catalog.title]);
-                  } else {
-                    return undefined;
-                  }
-                }
-              }
-              // If there are no settings for a given catalog, just render it completely
-              return renderCatalog(catalog, i, {});
-            })}
-
-            {/* For debugging the forms current values*/}
-            {/* <FormSpy subscription={{ values: true }}>
-                {({ values }) => (
-                  <pre>{JSON.stringify(values, null, 2)}</pre>
-                )}
-              </FormSpy> */}
-          </form>
-        )}
-      />
-    );
-  };
-
   return (
-    render()
+    <span css={validateStyle(true)}>{validate(field)}</span>
   );
 };
 
