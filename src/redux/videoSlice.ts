@@ -408,6 +408,12 @@ const videoSlice = createSlice({
       }
       return undefined;
     },
+    selectDisplayDuration: state => {
+      const minDisplayTime = 10; // in seconds, what is shown at max zoom
+      const durationInSeconds = state.duration / 1000;
+      const displayDuration = (1 - state.timelineZoom) * (durationInSeconds - minDisplayTime) + minDisplayTime;
+      return displayDuration;
+    },
   },
 });
 
@@ -592,6 +598,7 @@ export const {
   selectSubtitlesFromOpencast,
   selectSubtitlesFromOpencastById,
   selectVideos,
+  selectDisplayDuration,
 } = videoSlice.selectors;
 
 export default videoSlice.reducer;
