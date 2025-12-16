@@ -28,22 +28,12 @@ export const convertMsToReadableString = (ms: number): string => {
   return result.join("");
 };
 
-/**
- * Parses JSON. Returns [err, result]
- * @param str string that should be parsed
- */
-export function safeJsonParse(str: string) {
-  try {
-    return [null, JSON.parse(str)];
-  } catch (err) {
-    return [err];
-  }
-}
-
+// eslint-disable-next-line max-len
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 /**
  * Converts a working subtitle representation into a string
  */
-export function serializeSubtitle(subtitle: SubtitleCue[]) {
+export function serializeSubtitle(subtitle: SubtitleCue[]): string {
   const seri = new WebVTTSerializer();
 
   // Fix cues to work with serialize
@@ -129,6 +119,8 @@ export function parseSubtitle(subtitle: string): SubtitleCue[] {
 
   return tree.cues;
 }
+// eslint-disable-next-line max-len
+/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 
 /**
  * Parse language code to language name
@@ -212,3 +204,9 @@ export function outOfBounds(array: unknown[], index: number) {
   }
   return false;
 }
+
+// Typeguard for Dates
+export function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !isNaN(value.getTime());
+}
+

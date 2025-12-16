@@ -216,7 +216,7 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   }, [timelineWidth]);
 
   // Callback for when the scrubber gets dragged by the user
-  const onControlledDrag: DraggableEventHandler = debounce((_e, position) => {
+  const onControlledDrag: DraggableEventHandler = debounce((_e, position: { x: number, y : number }) => {
     // Update position
     const { x } = position;
     dispatch(setCurrentlyAt((x / timelineWidth) * (duration)));
@@ -627,8 +627,8 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
         xhr.open("GET", videoURL);
         xhr.responseType = "blob";
         xhr.onload = () => {
-          blob = xhr.response;
-          const file = new File([blob], blob);
+          blob = xhr.response as Blob;
+          const file = new File([blob], "waveform" + _index);
 
           // Start waveform worker with blob
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -636,12 +636,14 @@ export const Waveforms: React.FC<{ timelineHeight: number; }> = ({ timelineHeigh
             type: "img", width: "2000", height: "230", samples: 100000, media: file,
           });
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.onerror = (error: string) => {
             setWaveformWorkerError(true);
             console.log("Waveform could not be generated:" + error);
           };
 
           // When done, save path to generated waveform img
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.oncomplete = (image: string, _numSamples: number) => {
             newImages.push(image);
             waveformsProcessed++;

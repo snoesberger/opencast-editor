@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /**
  * Loads config values from
  * - a settings file
@@ -148,7 +153,6 @@ export const init = async () => {
   urlParams.forEach((value, key) => {
     // Create empty objects for full path (if the key contains ".") and set
     // the value at the end.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let obj: { [k: string]: any; } = rawUrlSettings;
     if (key.startsWith("opencast.") || key === "allowedCallbackPrefixes") {
       return;
@@ -197,7 +201,7 @@ const loadContextSettings = async () => {
   // Construct path to settings file. If the `VITE_APP_SETTINGS_PATH` is
   // given and starts with "/", it is interpreted as absolute path from the
   // server root.
-  const settingsPath = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
+  const settingsPath: string = import.meta.env.VITE_APP_SETTINGS_PATH || CONTEXT_SETTINGS_FILE;
   const base = settingsPath.startsWith("/") ? "" : basepath;
   const url = new URL(base.concat(settingsPath), window.location.origin);
   let response;
@@ -241,11 +245,9 @@ const loadContextSettings = async () => {
  * `srcDescription` is just a string for error messages specifying where `obj`
  * comes from.
  * */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const validate = (obj: Record<string, any> | null, allowParse: boolean, src: string, sourceDescription: string) => {
   // Validates `obj` with `schema`. `path` is the current path used for error
   // messages.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const validate = (schema: any, obj: Record<string, any> | null, path: string) => {
     if (typeof schema === "function") {
       return validateValue(schema, obj, path);
@@ -257,9 +259,7 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
   // Validate a settings value with a validation function. Returns the final
   // value of the setting or `null` if it should be ignored.
   const validateValue = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validation: (arg0: any, arg1: boolean, arg2: string) => any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: Record<string, any> | null,
     path: string,
   ) => {
@@ -277,11 +277,9 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
 
   // Validate a settings object/namespace. `schema` and `obj` need to be
   // objects.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const validateObj = (schema: any, obj: Record<string, any> | null, path: string) => {
     // We iterate through all keys of the given settings object, checking if
     // each key is valid and recursively validating the value of that key.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out: { [k: string]: any; } = {};
     for (const key in obj) {
       const newPath = path ? `${path}.${key}` : key;
@@ -309,13 +307,11 @@ const validate = (obj: Record<string, any> | null, allowParse: boolean, src: str
 
 // Validation functions for different types.
 const types = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   "string": (v: string, _allowParse: any) => {
     if (typeof v !== "string") {
       throw new Error("is not a string, but should be");
     }
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   "boolean": (v: string, allowParse: any) => {
     if (typeof v === "boolean") {
       return;
@@ -333,7 +329,6 @@ const types = {
       throw new Error("is not a boolean");
     }
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   "array": (v: string | [], _allowParse: any) => {
     if (!Array.isArray(v)) {
       throw new Error("is not an array, but should be");
@@ -345,7 +340,6 @@ const types = {
       }
     }
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   "map": (v: { [k: string]: string }, _allowParse: any) => {
     for (const key in v) {
       if (typeof key !== "string") {
@@ -356,7 +350,6 @@ const types = {
       }
     }
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   "objectsWithinObjects": (v: any, _allowParse: any) => {
     for (const catalogName in v) {
       if (typeof catalogName !== "string") {
@@ -428,5 +421,4 @@ const merge = (a: iSettings, b: iSettings) => {
   return deepmerge(a, b, { arrayMerge });
 };
 merge.all = (array: object[]) => deepmerge.all(array, { arrayMerge });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const arrayMerge = (_destinationArray: any, sourceArray: any, _options: any) => sourceArray;

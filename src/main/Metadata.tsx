@@ -240,6 +240,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           descLabel = t(`metadata.${field.name}.${key.replaceAll(".", "-")}` as ParseKeys);
 
           if (field.name === "license") {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             descLabel = t(`metadata.${field.name}.${JSON.parse(key).label.replaceAll(".", "-")}` as ParseKeys);
           }
         }
@@ -251,7 +252,9 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
 
         // Add to library
         library.push({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           value: value,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           label: descLabel ? descLabel : value,
         });
       });
@@ -269,6 +272,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
 
 
   const currentSelectValue = isMulti
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     ? selectOptions.filter(opt => (localValue as unknown as string[]).includes(opt.value))
     : selectOptions.find(opt => opt.value === localValue);
 
@@ -279,9 +283,11 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (selected: any) => {
     if (isMulti) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
       setLocalValue(selected?.map((s: any) => s.value) ?? []);
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       setLocalValue(selected?.value ?? "");
     }
   };

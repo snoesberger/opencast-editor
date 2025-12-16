@@ -126,11 +126,15 @@ const SubtitleListEditor: React.FC = () => {
 /**
  * Helper function for reducing rerender calls caused by react-window
  */
-const createItemData = memoize((items, identifier, defaultSegmentLength) => ({
-  items,
-  identifier,
-  defaultSegmentLength,
-}));
+function ItemData<T>(
+  items: T,
+  identifier: string,
+  defaultSegmentLength: number,
+) {
+  return { items, identifier, defaultSegmentLength };
+}
+
+export const createItemData = memoize(ItemData);
 
 /**
  * Global variable to synchronize padding for react-window elements

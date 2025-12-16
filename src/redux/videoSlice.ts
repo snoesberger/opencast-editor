@@ -84,6 +84,24 @@ export const initialState: video & httpRequestState = {
   errorReason: "unknown",
 };
 
+type FetchVideoInformation = {
+  segments: Omit<Segment, "id">[],
+  workflows: video["workflows"],
+  tracks: video["tracks"],
+  title: video["title"],
+  date: string, // Date string
+  duration: video["duration"],
+  workflow_active: boolean,
+  locking_active: video["lockingActive"],
+  lock_refresh: video["lockRefresh"],
+  lock_uuid: video["lock"]["uuid"],
+  lock_user: video["lock"]["user"], // username
+  waveformURIs: string[],
+  subtitles: video["subtitlesFromOpencast"],
+  local: boolean,
+  customizedTrackSelection: boolean, // TODO: Figure out if this still exists
+}
+
 export const fetchVideoInformation = createAppAsyncThunk("video/fetchVideoInformation", async () => {
   if (!settings.id) {
     throw new Error("Missing media package identifier");
@@ -91,7 +109,7 @@ export const fetchVideoInformation = createAppAsyncThunk("video/fetchVideoInform
 
   // const response = await client.get("https://legacy.opencast.org/admin-ng/tools/ID-dual-stream-demo/editor.json")
   const response = await client.get(`${settings.opencast.url}/editor/${settings.id}/edit.json`);
-  return JSON.parse(response);
+  return JSON.parse(response) as FetchVideoInformation;
 });
 
 const updateCurrentlyAt = (state: video, milliseconds: number) => {
@@ -318,8 +336,9 @@ const videoSlice = createSlice({
         state.status = "loading";
       });
     builder.addCase(
-      fetchVideoInformation.fulfilled, (state, { payload }) => {
+      fetchVideoInformation.fulfilled, (state, action: PayloadAction<FetchVideoInformation>) => {
         state.status = "success";
+        const payload = action.payload;
 
         if (payload.workflow_active) {
           state.status = "failed";
@@ -356,7 +375,6 @@ const videoSlice = createSlice({
           (track: Track) => { return { id: track.id, uri: track.thumbnailUri }; },
         );
 
-        state.aspectRatios = new Array(state.videoCount);
         state.lockingActive = payload.locking_active;
         state.lockRefresh = payload.lock_refresh;
         state.lock.uuid = payload.lock_uuid;
@@ -433,14 +451,14 @@ const updateActiveSegment = (state: video) => {
 /**
  * Helper Function for testing with current/old editor API
  */
-export const parseSegments = (segments: Segment[], duration: number) => {
+export const parseSegments = (segments: Omit<Segment, "id">[], duration: number) => {
   const newSegments: Segment[] = [];
 
   if (segments.length === 0) {
     newSegments.push({ id: nanoid(), start: 0, end: duration, deleted: false });
   }
 
-  segments.forEach((segment: Segment) => {
+  segments.forEach((segment: Omit<Segment, "id">) => {
     newSegments.push({ id: nanoid(), start: segment.start, end: segment.end, deleted: segment.deleted });
   });
   return newSegments;
