@@ -27,10 +27,10 @@ jobs:
           CROWDIN_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
         run: |
           crowdin download --config .crowdin.yaml -b main
-
-      - name: Update language list
-        working-directory: src/i18n/locales
-        run: $GITHUB_WORKSPACE/.github/generate-lngs.sh > ../lngs-generated.ts
+      # TODO: Find a way to generate only languages that are above a certain threshold
+      # - name: Update language list
+      #   working-directory: src/i18n/locales
+      #   run: $GITHUB_WORKSPACE/.github/generate-lngs.sh > ../lngs-generated.ts
 
       - name: Add new translations
         run: |
