@@ -35,6 +35,7 @@ import { LuHourglass } from "react-icons/lu";
 import { css } from "@emotion/react";
 import VideoPlayers from "./VideoPlayers";
 import VideoControls from "./VideoControls";
+import { fetchMetadata, selectGetStatus as selectMetadataGetStatus } from "../redux/metadataSlice";
 
 const Cutting: React.FC = () => {
 
@@ -51,6 +52,7 @@ const Cutting: React.FC = () => {
   const theme = useTheme();
   const errorReason = useAppSelector((state: { videoState: { errorReason: httpRequestState["errorReason"]; }; }) =>
     state.videoState.errorReason);
+  const metadataGetStatus = useAppSelector(selectMetadataGetStatus);
 
   // Try to fetch URL from external API
   useEffect(() => {
@@ -89,6 +91,13 @@ const Cutting: React.FC = () => {
       }
     }
   }, [videoURLStatus, dispatch, error, t, errorReason, duration, videos]);
+
+  // Already try fetching Metadata to reduce wait time
+  useEffect(() => {
+    if (metadataGetStatus === "idle") {
+      dispatch(fetchMetadata());
+    }
+  }, [metadataGetStatus, dispatch]);
 
   // Style
   const cuttingStyle = css({

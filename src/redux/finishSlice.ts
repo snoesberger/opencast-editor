@@ -20,7 +20,7 @@ export const finishSlice = createSlice({
     setState: (state, action: PayloadAction<finish["value"]>) => {
       state.value = action.payload;
     },
-    setPageNumber: (state, action) => {
+    setPageNumber: (state, action: PayloadAction<finish["pageNumber"]>) => {
       state.pageNumber = action.payload;
     },
   },

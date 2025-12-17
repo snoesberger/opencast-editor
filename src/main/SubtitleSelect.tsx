@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { ComponentProps, ReactElement, useEffect } from "react";
 import { css } from "@emotion/react";
 import {
   basicButtonStyle,
@@ -107,7 +107,7 @@ const SubtitleSelect: React.FC = () => {
   });
 
   const renderButtons = () => {
-    const buttons: JSX.Element[] = [];
+    const buttons: ReactElement<ComponentProps<typeof SubtitleSelectButton>>[] = [];
     if (settings.subtitles.languages === undefined) {
       return buttons;
     }
@@ -129,6 +129,7 @@ const SubtitleSelect: React.FC = () => {
         />,
       );
     }
+
     return buttons.sort((dat1, dat2) => dat1.props["title"].localeCompare(dat2.props["title"]));
   };
 
