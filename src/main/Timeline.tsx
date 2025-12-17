@@ -17,6 +17,7 @@ import {
   selectSegments,
   selectActiveSegmentIndex,
   moveCut,
+  selectDisplayDuration,
 } from "../redux/videoSlice";
 
 import { LuMenu } from "react-icons/lu";
@@ -74,13 +75,13 @@ const Timeline: React.FC<{
   const duration = useAppSelector(selectDuration);
   const durationInSeconds = useAppSelector(selectDurationInSeconds);
   const timelineZoom = useAppSelector(selectTimelineZoom);
+  const displayDuration = useAppSelector(selectDisplayDuration);
 
   const scrubberRef = useRef<HTMLDivElement | null>(null);
   const { ref, width = 1 } = useResizeObserver<HTMLDivElement>();
   const scrollContainerRef = useRef<HTMLElement>(null);
   const { width: scrollContainerWidth = 1 } = useResizeObserver<HTMLElement>({ ref: scrollContainerRef });
   const topOffset = 20;
-  const minDisplayTime = 10; // in seconds, what is shown at max zoom
 
   const currentlyScrolling = useRef(false);
   const zoomCenter = useRef(0);
@@ -99,15 +100,11 @@ const Timeline: React.FC<{
     zoomCenter.current = (scrubberVisible ? scrubberPosition : centerPosition) / width;
   };
 
-  const getDisplayPercentage = (zoomValue: number) => {
-    const displayDuration = (1 - zoomValue) * (durationInSeconds - minDisplayTime) + minDisplayTime;
-    return (durationInSeconds / displayDuration);
+  const displayPercentage = (durationInSeconds / displayDuration);
+  const getWaveformWidth = (baseWidth: number) => {
+    return baseWidth * displayPercentage;
   };
-  const getWaveformWidth = (baseWidth: number, zoomValue: number) => {
-    return baseWidth * getDisplayPercentage(zoomValue);
-  };
-  const displayPercentage = getDisplayPercentage(timelineZoom);
-  const zoomedWidth = getWaveformWidth(scrollContainerWidth, timelineZoom);
+  const zoomedWidth = getWaveformWidth(scrollContainerWidth);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(updateScroll, [currentlyAt, timelineZoom, width, scrollContainerWidth]);
@@ -244,7 +241,7 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   }, [timelineWidth]);
 
   // Callback for when the scrubber gets dragged by the user
-  const onControlledDrag: DraggableEventHandler = debounce((_e, position) => {
+  const onControlledDrag: DraggableEventHandler = debounce((_e, position: { x: number, y : number }) => {
     // Update position
     const { x } = position;
     dispatch(setCurrentlyAt((x / timelineWidth) * (duration)));
@@ -298,13 +295,13 @@ export const Scrubber = React.forwardRef<HTMLDivElement, ScrubberProps>((props, 
   useHotkeys(
     KEYMAP.timeline.increase.key,
     () => setKeyboardJumpDelta(keyboardJumpDelta => Math.min(keyboardJumpDelta * 10, 1000000)),
-    {},
+    { preventDefault: true },
     [keyboardJumpDelta],
   );
   useHotkeys(
     KEYMAP.timeline.decrease.key,
     () => setKeyboardJumpDelta(keyboardJumpDelta => Math.max(keyboardJumpDelta / 10, 1)),
-    {},
+    { preventDefault: true },
     [keyboardJumpDelta],
   );
 
@@ -679,8 +676,8 @@ export const Waveforms: React.FC<{ timelineHeight: number; topOffset?: number }>
         xhr.open("GET", videoURL);
         xhr.responseType = "blob";
         xhr.onload = () => {
-          blob = xhr.response;
-          const file = new File([blob], blob);
+          blob = xhr.response as Blob;
+          const file = new File([blob], "waveform" + _index);
 
           // Start waveform worker with blob
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -688,12 +685,14 @@ export const Waveforms: React.FC<{ timelineHeight: number; topOffset?: number }>
             type: "img", width: "2000", height: "230", samples: 100000, media: file,
           });
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.onerror = (error: string) => {
             setWaveformWorkerError(true);
             console.log("Waveform could not be generated:" + error);
           };
 
           // When done, save path to generated waveform img
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           waveformWorker.oncomplete = (image: string, _numSamples: number) => {
             newImages.push(image);
             waveformsProcessed++;

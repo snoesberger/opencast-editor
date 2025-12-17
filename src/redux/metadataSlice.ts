@@ -1,21 +1,33 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createEntityAdapter, createSlice, EntityState, nanoid, PayloadAction } from "@reduxjs/toolkit";
 import { client } from "../util/client";
 
 import { httpRequestState } from "../types";
 import { settings } from "../config";
 import { createAppAsyncThunk } from "./createAsyncThunkWithTypes";
+import { RootState } from "./store";
 
 export interface Catalog {
+  id: string      // generated
+  fieldIds: string[];      // references into `fields` adapter
+
+  flavor: string, // "dublincore/episode"
+  title: string,  // name identifier
+}
+
+interface BackendCatalog {
   fields: MetadataField[],
   flavor: string, // "dublincore/episode"
   title: string,  // name identifier
 }
 
 export interface MetadataField {
+  id: string;              // `${catalogId}:${fieldName}`
+  catalogId: string;
+  name: string;            // original `id`
+
   readOnly: boolean,
-  id: string;      // name
-  label: string;   // name identifier
-  type: string;    // irrelevant?
+  label: string;
+  type: string;
   value: string,
   required: boolean,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,15 +35,18 @@ export interface MetadataField {
 }
 
 interface metadata {
-  catalogs: Catalog[];
+  catalogs: EntityState<Catalog, string>,
+  fields: EntityState<MetadataField, string>,
   hasChanges: boolean;         // Did user make changes to metadata view since last save
 }
 
-// TODO: Create an "httpRequestState" array or something
-const initialState: metadata & httpRequestState = {
-  catalogs: [],
-  hasChanges: false,
+const catalogsAdapter = createEntityAdapter<Catalog>();
+const fieldsAdapter = createEntityAdapter<MetadataField>();
 
+const initialState: metadata & httpRequestState = {
+  catalogs: catalogsAdapter.getInitialState(),
+  fields: fieldsAdapter.getInitialState(),
+  hasChanges: false,
   status: "idle",
   error: undefined,
   errorReason: "unknown",
@@ -43,7 +58,7 @@ export const fetchMetadata = createAppAsyncThunk("metadata/fetchMetadata", async
   }
 
   const response = await client.get(`${settings.opencast.url}/editor/${settings.id}/metadata.json`);
-  return JSON.parse(response);
+  return JSON.parse(response) as BackendCatalog[];
 });
 
 /**
@@ -53,12 +68,12 @@ const metadataSlice = createSlice({
   name: "metadataState",
   initialState,
   reducers: {
-    setFieldValue: (state, action: PayloadAction<{ catalogIndex: number, fieldIndex: number, value: string; }>) => {
-      state.catalogs[action.payload.catalogIndex].fields[action.payload.fieldIndex].value = action.payload.value;
+    setFieldValue: (state, action: PayloadAction<{ id: string; value: string }>) => {
+      fieldsAdapter.updateOne(state.fields, {
+        id: action.payload.id,
+        changes: { value: action.payload.value },
+      });
       state.hasChanges = true;
-    },
-    setFieldReadonly: (state, action: PayloadAction<{ catalogIndex: number, fieldIndex: number, value: boolean; }>) => {
-      state.catalogs[action.payload.catalogIndex].fields[action.payload.fieldIndex].readOnly = action.payload.value;
     },
     setHasChanges: (state, action: PayloadAction<metadata["hasChanges"]>) => {
       state.hasChanges = action.payload;
@@ -69,12 +84,39 @@ const metadataSlice = createSlice({
       fetchMetadata.pending, (state, _action) => {
         state.status = "loading";
       });
-    builder.addCase(
-      fetchMetadata.fulfilled, (state, action) => {
-        state.catalogs = action.payload;
+    builder.addCase(fetchMetadata.fulfilled, (state, action) => {
+      // Entity Adapter preparations
+      const catalogEntities: Catalog[] = [];
+      const fieldEntities: MetadataField[] = [];
 
-        state.status = "success";
+      action.payload.forEach(rawCatalog => {
+        const catalogId = nanoid();                // new stable id
+        const fieldIds: string[] = [];
+
+        rawCatalog.fields.forEach(field => {
+          const fieldId = `${catalogId}:${field.id}`; // unique per catalog
+          fieldIds.push(fieldId);
+
+          fieldEntities.push({
+            ...field,
+            id: fieldId,
+            name: field.id,
+            catalogId,         // back‑reference for convenience
+          });
+        });
+
+        catalogEntities.push({
+          ...rawCatalog,
+          id: catalogId,
+          fieldIds,
+        });
       });
+
+      // Replace state with the fetched entities
+      catalogsAdapter.setAll(state.catalogs, catalogEntities);
+      fieldsAdapter.setAll(state.fields, fieldEntities);
+      state.hasChanges = false;
+    });
     builder.addCase(
       fetchMetadata.rejected, (state, action) => {
         state.status = "failed";
@@ -82,15 +124,18 @@ const metadataSlice = createSlice({
       });
   },
   selectors: {
-    selectCatalogs: state => state.catalogs,
     selectHasChanges: state => state.hasChanges,
     selectGetStatus: state => state.status,
     selectGetError: state => state.error,
     selectTitleFromEpisodeDc: state => {
-      for (const catalog of state.catalogs) {
+      for (const catalogId of state.catalogs.ids) {
+        const catalog = state.catalogs.entities[catalogId];
+        if (!catalog) { continue; }
+
         if (catalog.flavor === "dublincore/episode") {
-          for (const field of catalog.fields) {
-            if (field.id === "title") {
+          for (const fieldId of state.fields.ids) {
+            const field = state.fields.entities[fieldId];
+            if (field.catalogId === catalogId && field.name === "title") {
               return field.value;
             }
           }
@@ -102,10 +147,19 @@ const metadataSlice = createSlice({
   },
 });
 
-export const { setFieldValue, setHasChanges, setFieldReadonly } = metadataSlice.actions;
+export const { setFieldValue, setHasChanges } = metadataSlice.actions;
 
 export const {
-  selectCatalogs,
+  selectAll: selectAllCatalogs,
+  selectIds: selectCatalogIds,
+  selectById: selectCatalogById,
+} = catalogsAdapter.getSelectors<RootState>(s => s.metadataState.catalogs);
+
+export const {
+  selectById: selectFieldById,
+} = fieldsAdapter.getSelectors<RootState>(s => s.metadataState.fields);
+
+export const {
   selectHasChanges,
   selectGetStatus,
   selectGetError,

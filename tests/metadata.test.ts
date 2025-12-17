@@ -11,13 +11,13 @@ test.describe('Test Metadata-Page', () => {
   test('Check Inputfields', async ({ page }) => {
 
     for (let i = 0; i < input.length; i++) {
-      const locator = page.locator('input[name="catalog0.' + input[i] + '"]');
+      const locator = page.locator('input[name="' + input[i] + '"]');
       await expect(locator).toHaveValue(iValue[i]);
-      await page.click('input[name="catalog0.' + input[i] + '"]');
-      await page.fill('input[name="catalog0.' + input[i] + '"]', iFill[i]);
+      await page.click('input[name="' + input[i] + '"]');
+      await page.fill('input[name="' + input[i] + '"]', iFill[i]);
     }
     for (let i = 0; i < dropdown.length; i++) {
-      const locator = page.locator('input[name="catalog0.' + dropdown[i] + '"]');
+      const locator = page.locator('input[name="' + dropdown[i] + '"]');
       await expect(locator).toHaveValue(dValue[i]);
     }
   });
@@ -25,10 +25,10 @@ test.describe('Test Metadata-Page', () => {
   test('Check other fields', async ({ page }) => {
 
     // different syntax and or not editable
-    const description = page.locator('textarea[name="catalog0.description"]');
+    const description = page.locator('textarea[name="description"]');
     await expect(description).toHaveValue('');
-    await page.click('textarea[name="catalog0.description"]');
-    await page.fill('textarea[name="catalog0.description"]', 'Test-Description');
+    await page.click('textarea[name="description"]');
+    await page.fill('textarea[name="description"]', 'Test-Description');
 
     const startDate = page.locator('input[name="startDate"]');
     await expect(startDate).toHaveValue(/[0-9]/);
@@ -36,10 +36,10 @@ test.describe('Test Metadata-Page', () => {
     const created = page.locator('input[name="created"]');
     await expect(created).toHaveValue(/[0-9]/);
 
-    const publisher = page.locator('input[name="catalog0.publisher"]');
+    const publisher = page.locator('input[name="publisher"]');
     await expect(publisher).toHaveValue('');
 
-    const identifier = page.locator('input[name="catalog0.identifier"]');
+    const identifier = page.locator('input[name="identifier"]');
     await expect(identifier).toHaveValue('ID-dual-stream-demo');
 
   });
@@ -47,24 +47,24 @@ test.describe('Test Metadata-Page', () => {
   test('Check: Change Dropdown Value', async ({ page, browserName }) => {
 
     // Language
-    await page.click('text=LanguageNo value >> :nth-match(svg, 2)');
+    await page.click('[data-testid="language"] [class*="-control"]');
     await page.click('div[id*="option-22"]');
 
     // License
-    await page.click('text=LicenseCC-BY-SA >> :nth-match(svg, 2)');
+    await page.click('[data-testid="license"] [class*="-control"]');
     await page.click('div[id*="option-8"]');
 
     // Series / isPartOf
-    await page.click('text=SeriesNo value >> :nth-match(svg, 2)');
+    await page.click('[data-testid="isPartOf"] [class*="-control"]');
     await page.click('div[id*="option-4"]');
 
     // Creator
-    await page.click('[id="catalog0.creator"] div div >> :nth-match(div, 4)');
+    await page.click('[data-testid="creator"] [class*="-control"]');
     await page.click('div[id*="option-15"]');
     await page.click('[aria-label="Remove Lars Kiesow"]');
 
     // Contributor
-    await page.click('text=Contributor(s)Select... >> svg');
+    await page.click('[data-testid="contributor"] [class*="-control"]');
     await page.click('div[id*="option-15"]');
   });
 
@@ -75,5 +75,5 @@ const iValue = ['Dual-Stream Demo', '', '', '00:01:04', '', ''];
 const iFill = ['Test-Title', 'Test-Subject', 'Test-Rights', '00:02:45', 'Test-Location', 'Test-Source'];
 
 const dropdown = ['language', 'license', 'isPartOf', 'creator', 'contributor'];
-const dValue = ['', '{"label":"EVENTS.LICENSE.CCBYSA", "order":3, "selectable": true}', '', 'Lars Kiesow', ''];
+const dValue = ['', 'CC-BY-SA', '', 'Lars Kiesow', ''];
 

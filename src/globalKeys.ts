@@ -89,12 +89,12 @@ export const KEYMAP: IKeyMap = {
     },
     zoomIn: {
       name: "cuttingActions.zoomIn",
-      key: "Shift;Alt;z, +",
+      key: "Shift;Alt;r, +",
       splitKey: ";",
     },
     zoomOut: {
       name: "cuttingActions.zoomOut",
-      key: "Shift+Alt+t, -",
+      key: "Shift+Alt+e, -",
     },
   },
   timeline: {
