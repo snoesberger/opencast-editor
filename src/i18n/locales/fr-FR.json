@@ -62,6 +62,7 @@
         "comError-text": "Un problème est survenu lors de la communication avec Opencast.",
         "loadError-text": "Une erreur s'est produite lors du chargement de cette vidéo.",
         "durationError-text": "Opencast n'a pas indiqué la durée de la vidéo.",
+        "noVideoError-text": "The editor does not support audio files yet!",
         "title-tooltip": "Titre de la vidéo",
         "presenter-tooltip": "Présentateurs vidéo"
     },
@@ -241,23 +242,22 @@
         "deleteTrackTooltip": "Ne pas encoder et publier cette piste.",
         "restoreTrackTooltip": "Encoder et publier cette piste.",
         "cannotDeleteTrackTooltip": "Impossible de supprimer cette piste de la publication.",
-        "noSelectionPossible": "La sélection de pistes est désactivée pour cette vidéo, car au moins deux pistes sont nécessaires pour en désélectionner une.",
-        "help": "Au moins une piste doit être sélectionnée.",
-        "helpAtLeastOneVideo": "Au moins une piste vidéo doit être sélectionnée.",
-        "atMostTwoVideos": "La sélection de pistes est désactivée pour les événements avec plus de deux vidéos",
-        "customizeLabel": "Personnaliser la sélection de piste",
-        "videoTracksHeader": "Pistes vidéo",
-        "audioTracksHeader": "Pistes audio",
-        "confirmText": "Confirmer la sélection",
-        "confirmTooltip": "Confirmer les pistes sélectionnées",
-        "noAudioAvailable": "Pas d'audio disponible",
-        "selectionAlertInfoVideo_zero": "Vous n'avez sélectionné aucune piste vidéo.",
-        "selectionAlertInfoVideo_one": "Vous avez sélectionné 1 piste vidéo.",
-        "selectionAlertInfoVideo_other": "Vous avez sélectionné {{count}} pistes vidéo.",
-        "selectionAlertInfoAudio_zero": "Vous n'avez pas sélectionné de piste audio.",
-        "selectionAlertInfoAudio_one": "Vous avez sélectionné 1 piste audio. Elle sera dupliquée sur toutes les vidéos.",
-        "selectionAlertInfoAudio_other": "Vous avez sélectionné {{count}} pistes vidéo.",
-        "selectionAlertError": "Au moins une piste vidéo ou audio doit être sélectionnée."
+        "help": "At least one track has to be selected.",
+        "helpAtLeastOneVideo": "At least one video track has to be selected.",
+        "atMostTwoVideos": "Track Selection is disabled for events with more than two videos",
+        "customizeLabel": "Customize track selection",
+        "videoTracksHeader": "Video tracks",
+        "audioTracksHeader": "Audio tracks",
+        "confirmText": "Confirm selection",
+        "confirmTooltip": "Confirm selected tracks",
+        "noAudioAvailable": "No audio available",
+        "selectionAlertInfoVideo_zero": "You have not selected any video track.",
+        "selectionAlertInfoVideo_one": "You have selected 1 video track.",
+        "selectionAlertInfoVideo_other": "You have selected {{count}} video tracks.",
+        "selectionAlertInfoAudio_zero": "You have not selected any audio track.",
+        "selectionAlertInfoAudio_one": "You have selected 1 audio track. It will be duplicated onto all videos.",
+        "selectionAlertInfoAudio_other": "You have selected {{count}} audio tracks.",
+        "selectionAlertError": "At least one video or audio track has to be selected."
     },
     "subtitles": {
         "selectSubtitleButton-tooltip": "Modifier les sous-titres pour {{title}}",
@@ -297,7 +297,8 @@
         "addSegmentBelow": "Ajouter un segment ci-dessous",
         "jumpToSegmentAbove": "Aller au segment ci-dessus",
         "jumpToSegmentBelow": "Aller au segment ci-dessous",
-        "deleteSegment": "Supprimer le segment"
+        "deleteSegment": "Supprimer le segment",
+        "addCue": "Add segment at current time"
     },
     "subtitleVideoArea": {
         "selectVideoLabel": "Saveurs de la vidéo"
