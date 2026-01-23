@@ -4,4 +4,5 @@ export const languages = new Map<string, string>([
   ["en", "en-US"],
   ["es", "es-ES"],
   ["fr", "fr-FR"],
+  ["it", "it-IT"],
 ]);
