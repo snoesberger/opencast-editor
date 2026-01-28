@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { css } from "@emotion/react";
-import { basicButtonStyle } from "../cssStyles";
+import { basicButtonStyle, undisplay } from "../cssStyles";
 import { LuChevronLeft, LuDownload, LuTrash2, LuUpload } from "react-icons/lu";
 import {
   selectSubtitlesFromOpencastById,
@@ -47,6 +47,8 @@ import { ThemedTooltip } from "./Tooltip";
 import { titleStyle, titleStyleBold } from "../cssStyles";
 import { generateButtonTitle } from "./SubtitleSelect";
 import { ConfirmationModal, ConfirmationModalHandle, Modal, ModalHandle, ProtoButton } from "@opencast/appkit";
+
+const topRightButtonsBreakpoint = 1100;
 
 /**
  * Displays an editor view for a selected subtitle file
@@ -131,6 +133,7 @@ const SubtitleEditor: React.FC = () => {
     display: "flex",
     flexDirection: "row",
     gap: "10px",
+    flexWrap: "wrap",
   });
 
   const subAreaStyle = css({
@@ -246,7 +249,7 @@ const DeleteButton: React.FC = () => {
           css={[basicButtonStyle(theme), subtitleButtonStyle(theme)]}
         >
           <LuTrash2 css={{ fontSize: "16px" }}/>
-          <span>{t("subtitles.deleteButton-title")}</span>
+          <span css={undisplay(topRightButtonsBreakpoint)}>{t("subtitles.deleteButton-title")}</span>
         </ProtoButton>
       </ThemedTooltip>
       {/* Hidden input field for upload */}
@@ -297,7 +300,7 @@ const DownloadButton: React.FC = () => {
         css={[basicButtonStyle(theme), subtitleButtonStyle(theme)]}
       >
         <LuDownload css={{ fontSize: "16px" }} />
-        <span>{t("subtitles.downloadButton-title")}</span>
+        <span css={undisplay(topRightButtonsBreakpoint)}>{t("subtitles.downloadButton-title")}</span>
       </ProtoButton>
     </ThemedTooltip>
   );
@@ -373,7 +376,7 @@ const UploadButton: React.FC<{
           css={[basicButtonStyle(theme), subtitleButtonStyle(theme)]}
         >
           <LuUpload css={{ fontSize: "16px" }}/>
-          <span>{t("subtitles.uploadButton-title")}</span>
+          <span css={undisplay(topRightButtonsBreakpoint)}>{t("subtitles.uploadButton-title")}</span>
         </ProtoButton>
       </ThemedTooltip>
       {/* Hidden input field for upload */}
