@@ -426,3 +426,9 @@ export const undisplay = (maxWidth: number) => css({
     display: "none",
   },
 });
+
+export const undisplayContainer = (maxWidth: number) => css({
+  [`@container (max-width: ${maxWidth}px)`]: {
+    display: "none",
+  },
+});
