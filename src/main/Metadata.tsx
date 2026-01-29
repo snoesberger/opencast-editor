@@ -270,11 +270,18 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
     ? generateReactSelectLibrary(field)
     : [];
 
+  const toSelectValue = (value: string) => {
+    const found = selectOptions.find(opt => opt.value === value);
+
+    return {
+      value,
+      label: found?.label ?? value,
+    };
+  };
 
   const currentSelectValue = isMulti
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    ? selectOptions.filter(opt => (localValue as unknown as string[]).includes(opt.value))
-    : selectOptions.find(opt => opt.value === localValue);
+    ? (localValue as unknown as string[]).map(toSelectValue)
+    : toSelectValue(localValue);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setLocalValue(e.target.value);
@@ -380,7 +387,7 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           isSearchable={!readonly}    // by setting other settings
           openMenuOnClick={!readonly}
           menuIsOpen={readonly ? false : undefined}
-          options={generateReactSelectLibrary(field)}
+          options={field.collection ? generateReactSelectLibrary(field) : []}
           styles={selectFieldStyle(theme)}
           name={field.name}
           css={fieldTypeStyle(readonly)}>
@@ -403,7 +410,23 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
         </Select>
       );
     }
-
+  } else if (field.type === "mixed_text") {
+    return (
+      <CreatableSelect
+        onChange={handleSelectChange}
+        onBlur={commitImmediately}
+        value={currentSelectValue}
+        isMulti
+        isClearable={!readonly}     // The component does not support readOnly, so we have to work around
+        isSearchable={!readonly}    // by setting other settings
+        openMenuOnClick={!readonly}
+        menuIsOpen={readonly ? false : undefined}
+        options={field.collection ? generateReactSelectLibrary(field) : []}
+        styles={selectFieldStyle(theme)}
+        name={field.name}
+        css={fieldTypeStyle(readonly)}>
+      </CreatableSelect>
+    );
   } else if (field.type === "date") {
     return (
       <ThemeProvider theme={calendarStyle(theme)}>
