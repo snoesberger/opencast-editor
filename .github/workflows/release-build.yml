@@ -10,7 +10,7 @@ on:
 jobs:
   build-release-tarballs:
     name: Create release from tag
-    if: github.repository_owner == 'Arnei'
+    if: github.repository_owner == 'opencast'
     runs-on: ubuntu-latest
     outputs:
       checksum: ${{ steps.tarball.outputs.checksum }}
@@ -80,3 +80,54 @@ jobs:
           files: oc-editor-*.tar.gz
           fail_on_unmatched_files: true
           generate_release_notes: true
+
+  file-upstream-release-pr:
+    name: Create upstream PR to incorporate release
+    if: github.repository_owner == 'opencast'
+    runs-on: ubuntu-latest
+    needs: build-release-tarballs
+    permissions:
+      contents: write #for the release
+      pull-requests: write #For the PR in the upstream repo
+
+    steps:
+      - name: Prepare git
+        run: |
+          git config --global user.name "Release Bot"
+          git config --global user.email "cloud@opencast.org"
+
+      - name: Prepare GitHub SSH key
+        env:
+          DEPLOY_KEY: ${{ secrets.MODULE_PR_DEPLOY_KEY }}
+        run: |
+          install -dm 700 ~/.ssh/
+          echo "${DEPLOY_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Clone upstream repository
+        run: |
+          git clone -b ${{ needs.build-release-tarballs.outputs.branch }} "git@github.com:${{ github.repository_owner }}/opencast.git" opencast
+          cd opencast
+          git checkout -b t/editor-${{ needs.build-release-tarballs.outputs.tag }}
+
+      - name: Update the editor pom file
+        working-directory: opencast
+        run: |
+          sed -i "s#<editor.sha256>.*</editor.sha256>#<editor.sha256>${{ needs.build-release-tarballs.outputs.checksum }}</editor.sha256>#" modules/editor/pom.xml
+          sed -i "s#<editor.url>.*</editor.url>#<editor.url>https://github.com/${{ github.repository_owner }}/opencast-editor/releases/download/${{ needs.build-release-tarballs.outputs.tag }}/oc-editor-${{ needs.build-release-tarballs.outputs.tag }}.tar.gz</editor.url>#" modules/editor/pom.xml
+          git add modules/editor/pom.xml
+          git commit -m "Updating editor to ${{ needs.build-release-tarballs.outputs.tag }}"
+          git push origin t/editor-${{ needs.build-release-tarballs.outputs.tag }}
+          #This token is an account wide token which allows creation of PRs and pushes.
+          echo "${{ secrets.MODULE_PR_TOKEN }}" > token.txt
+          gh auth login --with-token < token.txt
+          gh pr create \
+            --title "Update ${{ needs.build-release-tarballs.outputs.branch }} Editor to ${{ needs.build-release-tarballs.outputs.tag }}" \
+            --body "Updating Opencast ${{ needs.build-release-tarballs.outputs.branch }} Editor module to [${{ needs.build-release-tarballs.outputs.tag }}](https://github.com/${{ github.repository_owner }}/opencast-editor/releases/tag/${{ needs.build-release-tarballs.outputs.tag }})" \
+            --head=${{ github.repository_owner }}:t/editor-${{ needs.build-release-tarballs.outputs.tag }} \
+            --base ${{ needs.build-release-tarballs.outputs.branch }} \
+            -R ${{ github.repository_owner }}/opencast
+            #FIXME: fine grained PATs can't apply labels
+            #FIXME: classic PATs don't have the permissions because the PR isn't in an opencastproject (the user) repo
+            #--label editor --label maintenance \
