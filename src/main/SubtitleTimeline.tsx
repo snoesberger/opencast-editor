@@ -132,8 +132,15 @@ const SubtitleTimeline: React.FC = () => {
     }
   };
 
+  const subtitleTimelineStyle = css({
+    position: "relative",
+    width: "100%",
+    height: "250px",
+    paddingBottom: "15px",
+  });
+
   return (
-    <div css={{ position: "relative", width: "100%", height: "250px" }}>
+    <div css={subtitleTimelineStyle}>
       {/* "Scrubber". Sits smack dab in the middle and does not move */}
       <div
         css={{
