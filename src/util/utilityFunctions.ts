@@ -210,3 +210,14 @@ export function isValidDate(value: unknown): value is Date {
   return value instanceof Date && !isNaN(value.getTime());
 }
 
+export const isJson = (text: string) => {
+  try {
+    // TODO: Handle JSON parsing errors
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const json = JSON.parse(text);
+    const type = Object.prototype.toString.call(json);
+    return type === "[object Object]" || type === "[object Array]";
+  } catch (_e) {
+    return false;
+  }
+};

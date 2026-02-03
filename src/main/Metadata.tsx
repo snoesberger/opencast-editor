@@ -28,6 +28,7 @@ import { ParseKeys } from "i18next";
 import { ErrorBox } from "@opencast/appkit";
 import { screenWidthAtMost } from "@opencast/appkit";
 import { debounce } from "lodash";
+import { isJson } from "../util/utilityFunctions";
 
 /**
  * The root component for Metadata
@@ -232,7 +233,8 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
   const generateReactSelectLibrary = (field: MetadataField) => {
     if (field.collection) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const library: { value: any, label: string }[] = [];
+      const library: { value: any, label: string, order?: number }[] = [];
+      let hasCustomOrder = false;
       Object.entries(field.collection).forEach(([key, value]) => {
         // Parse Label
         let descLabel = null;
@@ -250,16 +252,41 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           descLabel = key;
         }
 
+        let order = null;
+        if (isJson(key)) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const parsed = JSON.parse(key);
+          if (parsed && typeof parsed === "object" && "order" in parsed) {
+            hasCustomOrder = true;
+            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            order = parsed.order;
+          }
+        }
+
         // Add to library
         library.push({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           value: value,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           label: descLabel ? descLabel : value,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          order: order,
         });
       });
-      library.sort((a, b) => a.label.localeCompare(b.label));
+
+      // Sort
+      if (hasCustomOrder) {
+        // Apply custom ordering.
+        // @ts-expect-error: Can assume order is present
+        library.sort((a, b) => a.order - b.order);
+      } else {
+        // Apply alphabetical ordering.
+        library.sort((a, b) => a.label.localeCompare(b.label));
+      }
+
       library.unshift({ value: "", label: "No value" });
+
       return library;
     } else {
       return [];
