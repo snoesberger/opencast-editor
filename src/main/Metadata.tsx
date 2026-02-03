@@ -417,7 +417,10 @@ const FieldContent: React.FC<{ field: MetadataField, readonly?: boolean }> = ({ 
           options={field.collection ? generateReactSelectLibrary(field) : []}
           styles={selectFieldStyle(theme)}
           name={field.name}
-          css={fieldTypeStyle(readonly)}>
+          css={fieldTypeStyle(readonly)}
+          components={readonly ? {
+            MultiValueRemove: () => null,
+          } : undefined}>
         </CreatableSelect>
       );
     } else {
