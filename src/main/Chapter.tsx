@@ -183,14 +183,16 @@ const Chapter: React.FC = () => {
               setCurrentlyAtAndTriggerPreview={setCurrentlyAtAndTriggerPreview}
             />
           </div>
-          <Timeline
-            selectCurrentlyAt={selectCurrentlyAt}
-            selectIsPlaying={selectIsPlaying}
-            setClickTriggered={setClickTriggered}
-            setCurrentlyAt={setCurrentlyAt}
-            setIsPlaying={setIsPlaying}
-            isChapters={true}
-          />
+          <div>
+            <Timeline
+              selectCurrentlyAt={selectCurrentlyAt}
+              selectIsPlaying={selectIsPlaying}
+              setClickTriggered={setClickTriggered}
+              setCurrentlyAt={setCurrentlyAt}
+              setIsPlaying={setIsPlaying}
+              isChapters={true}
+            />
+          </div>
           <CuttingActions
             add={cut}
             deleteByMerge={deleteByMerge}
