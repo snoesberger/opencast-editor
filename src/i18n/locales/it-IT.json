@@ -4,6 +4,7 @@
         "finish-button": "Termina",
         "select-tracks-button": "Tracce",
         "subtitles-button": "Sottotitoli",
+        "chapters-button": "Chapters",
         "thumbnail-button": "Miniatura",
         "metadata-button": "Metadati",
         "keyboard-controls-button": "Controlli tastiera",
@@ -13,12 +14,20 @@
         "cut-button": "Tagliare",
         "cut-tooltip": "Dividere il segmento alla posizione corrente del marcatore della timeline. Scorciatoia: {{hotkeyName}}",
         "cut-tooltip-aria": "Taglia. Dividere il segmento nella posizione corrente del marcatore della timeline. Scorciatoia: {{hotkeyName}}.",
+        "add-button": "Add",
+        "add-tooltip": "Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
+        "add-tooltip-aria": "Add. Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
         "delete-button": "Eliminare",
         "delete-restore-tooltip": "Seleziona o deseleziona il segmento alla posizione corrente come da eliminare. Scorciatoia: {{hotkeyName}}",
         "delete-restore-tooltip-aria": "Elimina e ripristina. Seleziona o deseleziona il segmento nella posizione corrente come da eliminare. Scorciatoia: {{hotkeyName}}.",
+        "deleteByMerge-tooltip": "Remove the segment at the current position. Hotkey: {{hotkeyName}}",
+        "deleteByMerge-tooltip-aria": "Remove the segment at the current position. Hotkey: {{hotkeyName}}.",
         "merge-all-button": "Unisci Tutto",
         "merge-all-tooltip": "Combina tutti i segmenti in un singolo segmento.",
         "merge-all-tooltip-aria": "Unisci tutti. Combina tutti i segmenti in un singolo segmento.",
+        "delete-all-button": "Delete All",
+        "delete-all-tooltip": "Remove all segments.",
+        "delete-all-tooltip-aria": "Delete All. Remove all segments.",
         "restore-button": "Ripristinare",
         "mergeLeft-button": "Unisci a sinistra",
         "mergeLeft-tooltip": "Combina il segmento attualmente attivo con il segmento alla sua sinistra. Scorciatoia: {{hotkeyName}}",
@@ -296,6 +305,9 @@
     },
     "subtitleTimeline": {
         "overviewTimelineTooltip": "Panoramica della linea temporale"
+    },
+    "chapters": {
+        "editTitle": "Chapter Editor"
     },
     "keyboardControls": {
         "header": "Scorciatoie",

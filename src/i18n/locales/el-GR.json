@@ -4,6 +4,7 @@
         "finish-button": "Ολοκλήρωση",
         "select-tracks-button": "Κομμάτια",
         "subtitles-button": "Υπότιτλοι",
+        "chapters-button": "Chapters",
         "thumbnail-button": "Μικρογραφία",
         "metadata-button": "Μεταδεδομένα",
         "keyboard-controls-button": "Έλεγχοι Πληκτρολογίου",
@@ -13,12 +14,20 @@
         "cut-button": "Αποκοπή",
         "cut-tooltip": "Διαχωρισμός του τμήματος στην τρέχουσα θέση του χρονοδιαγράμματος. Πλήκτρο συντόμευσης: {{hotkeyName}}",
         "cut-tooltip-aria": "Αποκοπή. Διαχωρίστε το τμήμα στην τρέχουσα θέση του χρονοδιαγράμματος. Πλήκτρο συντόμευσης: {{hotkeyName}}.",
+        "add-button": "Add",
+        "add-tooltip": "Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}",
+        "add-tooltip-aria": "Add. Add a segment at the current timeline marker position. Hotkey: {{hotkeyName}}.",
         "delete-button": "Διαγραφή",
         "delete-restore-tooltip": "Σήμανση ή κατάργηση του τμήματος στην τρέχουσα θέση ως διαγραφή. Πλήκτρο συντόμευσης: {{hotkeyName}}",
         "delete-restore-tooltip-aria": "Διαγραφή και Επαναφορά. Σήμανση ή κατάργηση επισήμανσης του τμήματος στην τρέχουσα θέση ως διαγραφή. Πλήκτρο συντόμευσης: {{hotkeyName}}.",
+        "deleteByMerge-tooltip": "Remove the segment at the current position. Hotkey: {{hotkeyName}}",
+        "deleteByMerge-tooltip-aria": "Remove the segment at the current position. Hotkey: {{hotkeyName}}.",
         "merge-all-button": "Συγχώνευση Όλων",
         "merge-all-tooltip": "Συνδυάστε όλα τα τμήματα σε ένα μόνο τμήμα.",
         "merge-all-tooltip-aria": "Συγχώνευση Όλων. Συνδυάστε όλα τα τμήματα σε ένα μόνο τμήμα.",
+        "delete-all-button": "Delete All",
+        "delete-all-tooltip": "Remove all segments.",
+        "delete-all-tooltip-aria": "Delete All. Remove all segments.",
         "restore-button": "Επαναφορά",
         "mergeLeft-button": "Συγχώνευση Αριστερά",
         "mergeLeft-tooltip": "Συνδυάστε το τρέχον ενεργό τμήμα με το τμήμα στα αριστερά. Πλήκτρο συντόμευσης: {{hotkeyName}}",
@@ -296,6 +305,9 @@
     },
     "subtitleTimeline": {
         "overviewTimelineTooltip": "Επισκόπηση χρονολογίου"
+    },
+    "chapters": {
+        "editTitle": "Chapter Editor"
     },
     "keyboardControls": {
         "header": "Συντομεύσεις",
