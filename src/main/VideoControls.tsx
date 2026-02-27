@@ -11,7 +11,7 @@ import {
 } from "../redux/videoSlice";
 
 import { convertMsToReadableString } from "../util/utilityFunctions";
-import { BREAKPOINTS, basicButtonStyle, undisplay } from "../cssStyles";
+import { BREAKPOINTS, basicButtonStyle, undisplayContainer } from "../cssStyles";
 
 import { KEYMAP, rewriteKeys } from "../globalKeys";
 import { useTranslation } from "react-i18next";
@@ -69,6 +69,7 @@ const VideoControls: React.FC<{
     paddingTop: "10px",
     paddingBottom: "10px",
     gap: "30px",
+    containerType: "inline-size", // So @container-queries can be used
   });
 
   return (
@@ -178,7 +179,7 @@ const PreviewMode: React.FC<{
           }
         }}
       >
-        <div css={[previewModeTextStyle(theme), undisplay(BREAKPOINTS.medium)]}>
+        <div css={[previewModeTextStyle(theme), undisplayContainer(BREAKPOINTS.medium)]}>
           {t("video.previewButton")}
         </div>
         {isPlayPreview ? <FaToggleOn css={[basicButtonStyle(theme), switchIconStyle]} />
@@ -342,22 +343,28 @@ const TimeDisplay: React.FC<{
   const duration = useAppSelector(selectDuration);
   const theme = useTheme();
 
+  const timeDisplayStyle = css({
+    display: "flex",
+    flexDirection: "row",
+    gap: "5px",
+  });
+
   const timeTextStyle = (theme: Theme) => css({
     display: "inline-block",
     color: `${theme.text}`,
   });
 
   return (
-    <div css={{ display: "flex", flexDirection: "row", gap: "5px" }}>
+    <div css={timeDisplayStyle}>
       <ThemedTooltip title={t("video.current-time-tooltip")}>
         <time css={timeTextStyle(theme)}
           tabIndex={0} role="timer" aria-label={t("video.time-aria") + ": " + convertMsToReadableString(currentlyAt)}>
           {new Date((currentlyAt ? currentlyAt : 0)).toISOString().substr(11, 10)}
         </time>
       </ThemedTooltip>
-      <div css={undisplay(BREAKPOINTS.medium)}>{" / "}</div>
+      <div css={undisplayContainer(BREAKPOINTS.medium)}>{" / "}</div>
       <ThemedTooltip title={t("video.time-duration-tooltip")}>
-        <div css={[timeTextStyle(theme), undisplay(BREAKPOINTS.medium)]}
+        <div css={[timeTextStyle(theme), undisplayContainer(BREAKPOINTS.medium)]}
           tabIndex={0} aria-label={t("video.duration-aria") + ": " + convertMsToReadableString(duration)}>
           {new Date((duration ? duration : 0)).toISOString().substr(11, 10)}
         </div>
@@ -459,7 +466,7 @@ const VolumeSlider: React.FC<{
       </ThemedTooltip>
       <ThemedTooltip title={t("video.volume-tooltip", { current: Math.trunc(volume * 100) })}>
         <Slider
-          css={sliderStyle}
+          css={[sliderStyle, undisplayContainer(BREAKPOINTS.medium)]}
           min={0}
           max={1}
           step={0.01}
